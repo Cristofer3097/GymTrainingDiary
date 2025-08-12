@@ -258,7 +258,8 @@
   "training_archive_error": "Error loading preview of file",
   "training_unselect_error": "Cannot deselect an exercise with entered data.",
   "training_unselect_title": "Action not allowed",
-
+  "training_progress_info_title": "What does this icon mean?",
+  "training_progress_info_content": "Reflects your performance in this set compared to the last log for this exercise:\n\n ✔️ Improvement! You lifted more weight or did more reps.\n\n ❌ Decline. Lower weight or reps than last time.\n\n ➖ Same performance or no previous record. \n\n\n Note: if you add more series, it will show only the series where the records were entered.",
   "templateNameLabel": "Template name",
   "templateNameCannotBeEmpty": "Template name cannot be empty.",
   "template_delete": "Select Template to Delete",

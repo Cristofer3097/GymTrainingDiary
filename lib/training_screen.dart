@@ -18,6 +18,7 @@ import '../settings.dart';
 import 'package:diacritic/diacritic.dart';
 
 
+enum ProgressStatus { improvement, decline, neutral, noData }
 // Clase principal de la pantalla de Entrenamiento
 class TrainingScreen extends StatefulWidget {
   final List<Map<String, dynamic>>? initialExercises;
@@ -1697,6 +1698,8 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
   late Map<String, dynamic> _currentExerciseDataLog;
   bool _isUnitInitialized = false;
 
+  late List<ProgressStatus> _progressStatuses;
+
   @override
   void initState() {
     super.initState();
@@ -1708,7 +1711,6 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
     notesController = TextEditingController(
         text: _currentExerciseDataLog['notes']?.toString() ?? '');
     seriesCountFromInput = int.tryParse(seriesController.text.trim()) ?? 0;
-
     _initializeUnit();
 
 
@@ -1716,7 +1718,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
     weightControllers = [];
     repWarnings = [];
     weightWarnings = [];
-
+    _progressStatuses = [];
     _initializeSeriesSpecificFields(); // Configura la cantidad de campos
 
     // Poblar controladores y unidades después de _initializeSeriesSpecificFields
@@ -1742,7 +1744,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
         weightControllers[i].text = initialWeights[i];
       }
     }
-    // No es necesario poblar currentSeriesWeightUnits
+    _updateAllProgressStatuses();
   }
 
   Future<void> _initializeUnit() async {
@@ -1793,8 +1795,97 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
             TextEditingController(
                 text: i < oldWeightValues.length ? oldWeightValues[i] : ''));
     weightWarnings = List.generate(targetSeriesForRepFields, (_) => '');
+    _progressStatuses = List.generate(targetSeriesForRepFields, (_) => ProgressStatus.noData);
+    _updateAllProgressStatuses();
+  }
+  void _updateProgressStatus(int index) {
+    if (widget.lastLog == null) {
+      if (mounted) setState(() => _progressStatuses[index] = ProgressStatus.neutral);
+      return;
+    }
+
+    final List<String> lastRepsList = (widget.lastLog!['reps'] as String? ?? '').split(',');
+    final List<String> lastWeightsList = (widget.lastLog!['weight'] as String? ?? '').split(',');
+
+    if (index >= lastRepsList.length || index >= lastWeightsList.length) {
+      if (mounted) setState(() => _progressStatuses[index] = ProgressStatus.neutral);
+      return;
+    }
+
+    final double? lastWeight = double.tryParse(lastWeightsList[index].trim());
+    final int? lastReps = int.tryParse(lastRepsList[index].trim());
+    final double? currentWeight = double.tryParse(weightControllers[index].text.trim().replaceAll(',', '.'));
+    final int? currentReps = int.tryParse(repControllers[index].text.trim());
+
+    if (currentWeight == null || currentReps == null || lastWeight == null || lastReps == null) {
+      if (mounted) setState(() => _progressStatuses[index] = ProgressStatus.noData);
+      return;
+    }
+
+    ProgressStatus newStatus;
+    if (currentWeight > lastWeight || (currentWeight == lastWeight && currentReps > lastReps)) {
+      newStatus = ProgressStatus.improvement;
+    } else if (currentWeight < lastWeight || (currentWeight == lastWeight && currentReps < lastReps)) {
+      newStatus = ProgressStatus.decline;
+    } else {
+      newStatus = ProgressStatus.neutral;
+    }
+
+    if (mounted) setState(() => _progressStatuses[index] = newStatus);
+  }
+  // Función para actualizar todos los estados
+  void _updateAllProgressStatuses() {
+    for (int i = 0; i < repControllers.length; i++) {
+      _updateProgressStatus(i);
+    }
   }
 
+  // Función que devuelve el ícono correspondiente
+  Widget _buildProgressIcon(int index) {
+    if (index >= _progressStatuses.length) {
+      return const SizedBox(width: 24);
+    }
+
+    IconData iconData;
+    Color iconColor;
+
+    switch (_progressStatuses[index]) {
+      case ProgressStatus.improvement:
+        iconData = Icons.check_circle;
+        iconColor = Colors.green;
+        break;
+      case ProgressStatus.decline:
+        iconData = Icons.cancel;
+        iconColor = Colors.red;
+        break;
+      case ProgressStatus.neutral:
+        iconData = Icons.horizontal_rule_rounded;
+        iconColor = Colors.grey;
+        break;
+      case ProgressStatus.noData:
+        return const SizedBox(width: 24);
+    }
+
+    return Icon(iconData, color: iconColor);
+  }
+
+  // Dialogo informativo
+  void _showProgressInfoDialog() {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.training_progress_info_title),
+        content: Text(l10n.training_progress_info_content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.close),
+          )
+        ],
+      ),
+    );
+  }
 
   void _validateRepValue(String value, int index) {
     final l10n = AppLocalizations.of(context)!;
@@ -1823,6 +1914,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
         }
       }
     });
+    _updateProgressStatus(index);
   }
 
   void _validateWeightValue(String value, int index) {
@@ -1845,6 +1937,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
           weightWarnings[index] = l10n.training_set_invalid;
         }
       }
+      _updateProgressStatus(index);
     });
   }
 
@@ -2207,15 +2300,13 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
 
     // BorderSide para el campo de Series cuando está habilitado (no enfocado)
     BorderSide seriesEnabledBorderSide = isAdvisoryWarningActive
-        ? BorderSide(color: theme.colorScheme.error,
-        width: 1.0) // Borde rojo si advertencia activa
+        ? BorderSide(color: theme.colorScheme.error, width: 1.0) // Borde rojo si advertencia activa
         : inputDecorationTheme.enabledBorder?.borderSide ??
         BorderSide(color: Colors.grey[700]!, width: 0.5);
 
     // BorderSide para el campo de Series cuando está enfocado
     BorderSide seriesFocusedBorderSide = isAdvisoryWarningActive
-        ? BorderSide(color: theme.colorScheme.error,
-        width: 2.0) // Borde rojo más grueso si advertencia activa
+        ? BorderSide(color: theme.colorScheme.error, width: 2.0) // Borde rojo más grueso si advertencia activa
         : inputDecorationTheme.focusedBorder?.borderSide ?? BorderSide(
         color: const Color(0xFFFFC107),
         width: 1.5); // Amarillo (amarilloPrincipal)
@@ -2319,9 +2410,13 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                           ? l10n.training_selection_units
                           : null,
                     )
-                        : Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.0))), // Muestra un loading
+                        : Center(
+                        child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child:
+                            CircularProgressIndicator(strokeWidth: 2.0))),
                   ),
-                  // .
                 ],
               ),
               if (seriesWarningText.isNotEmpty)
@@ -2339,104 +2434,112 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                     ),
                   ),
                 ),
-              SizedBox(height: 12),
-              Text(l10n.training_Details, style: Theme
-                  .of(context)
-                  .textTheme
-                  .titleMedium),
-              if (seriesCountFromInput <= 0 && repControllers.isEmpty &&
-                  weightControllers.isEmpty) Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: Text(l10n.training_details_text, style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontStyle: FontStyle.italic)))
-              else
-                if (repControllers.isEmpty && weightControllers.isEmpty &&
-                    seriesCountFromInput > 0) Padding(
+              SizedBox(height: 24),
+              if (seriesCountFromInput <= 0)
+                Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: Text(l10n.training_details_text_2(
-                        seriesCountFromInput.toString()), style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontStyle: FontStyle.italic)))
-                else
-                  ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: repControllers.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                            padding: const EdgeInsets.only(top: 10.0),
-
-                            child: Column(
-
-                              children: [
-                                Text(
-                                  ' ${l10n.serie} ${index + 1}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    // Un poco más de énfasis
-                                    fontSize: 16,
-                                    // Tamaño legible
-                                    color: Theme
-                                        .of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withOpacity(0.85), // Color del texto
+                    child: Text(l10n.training_details_text,
+                        style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontStyle: FontStyle.italic)))
+              else
+                ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: repControllers.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                          padding: const EdgeInsets.only(top: 12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // Título "Set X" centrado
+                                  Center(
+                                    child: Text(
+                                      '${l10n.serie} ${index + 1}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 16,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(0.85),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 6),
-                                // Espacio entre el título de la serie y los campos de entrada
-
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      flex: 2, // 2/3 para reps
-                                      child: TextFormField(
-                                        controller: repControllers[index],
-                                        keyboardType: TextInputType.number,
-                                        decoration: InputDecoration(
-                                          labelText: l10n.repetitions,
-                                          border: OutlineInputBorder(),
-                                          errorMaxLines: 2,
-                                          errorText: (repWarnings.length >
-                                              index &&
-                                              repWarnings[index].isNotEmpty)
-                                              ? repWarnings[index]
-                                              : null,
-                                        ),
-                                        onChanged: (value) =>
-                                            _validateRepValue(value, index),
+                                  if (index == 0)
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: IconButton(
+                                        icon: Icon(Icons.info_outline, color: theme.primaryColor),
+                                        onPressed: _showProgressInfoDialog,
                                       ),
                                     ),
-                                    SizedBox(width: 8),
-                                    Expanded(
-                                      flex: 1, // 1/3 para peso
-                                      child: TextFormField(
-                                        controller: weightControllers[index],
-                                        keyboardType: TextInputType
-                                            .numberWithOptions(decimal: true),
-                                        decoration: InputDecoration(
-                                          labelText: l10n.weight,
-                                          border: OutlineInputBorder(),
-                                          errorMaxLines: 2,
-                                          errorText: (weightWarnings.length >
-                                              index &&
-                                              weightWarnings[index].isNotEmpty)
-                                              ? weightWarnings[index]
-                                              : null,
-                                        ),
-                                        onChanged: (value) =>
-                                            _validateWeightValue(value, index),
+                                ],
+                              ),
+                              SizedBox(height: 6),
+                              // --- FILA DE CAMPOS DE ENTRADA ---
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    flex: 5,
+                                    child: TextFormField(
+                                      controller: repControllers[index],
+                                      keyboardType: TextInputType.number,
+                                      decoration: InputDecoration(
+                                        labelText: l10n.repetitions,
+                                        border: OutlineInputBorder(),
+                                        errorMaxLines: 2,
+                                        errorText: (repWarnings.length > index &&
+                                            repWarnings[index].isNotEmpty)
+                                            ? repWarnings[index]
+                                            : null,
                                       ),
+                                      onChanged: (value) =>
+                                          _validateRepValue(value, index),
                                     ),
-                                  ],
-                                )
-                              ],
-                            ));
-                      }),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 5,
+                                    child: TextFormField(
+                                      controller: weightControllers[index],
+                                      keyboardType:
+                                      TextInputType.numberWithOptions(
+                                          decimal: true),
+                                      decoration: InputDecoration(
+                                        labelText: l10n.weight,
+                                        border: OutlineInputBorder(),
+                                        errorMaxLines: 2,
+                                        errorText:
+                                        (weightWarnings.length > index &&
+                                            weightWarnings[index].isNotEmpty)
+                                            ? weightWarnings[index]
+                                            : null,
+                                      ),
+                                      onChanged: (value) =>
+                                          _validateWeightValue(value, index),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  SizedBox(
+                                    width: 40,
+                                    height: 60,
+                                    child: Center(
+                                        child: _buildProgressIcon(index)),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ));
+                    }),
               SizedBox(height: 20),
-              TextFormField(controller: notesController,
+              TextFormField(
+                  controller: notesController,
                   decoration: InputDecoration(
                       labelText: l10n.training_notes,
                       border: OutlineInputBorder(),
@@ -2446,73 +2549,58 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                   minLines: 1,
                   textCapitalization: TextCapitalization.sentences),
               SizedBox(height: 24),
-
               if (widget.lastLog != null) ...[
-                Text(l10n.training_register, style: Theme
-                    .of(context)
-                    .textTheme
-                    .titleMedium),
+                Text(l10n.training_register,
+                    style: Theme.of(context).textTheme.titleMedium),
                 SizedBox(height: 8),
-                Builder( // Usar Builder para acceder al context dentro de la condición
-                    builder: (context) {
-                      String formattedDate = l10n.training_date_unknown;
-                      if (widget.lastLog!['dateTime'] != null) {
-                        try {
-                          DateTime dt = DateTime.parse(
-                              widget.lastLog!['dateTime']);
-                          // Puedes elegir el formato que prefieras. Ej: "dd 'de' MMMM 'de' yyyy" o "dd/MM/yyyy"
-                          formattedDate =
-                              DateFormat.yMMMMd(l10n.localeName).format(dt);
-                        } catch (e) {
-                          print(l10n.training_error_format);
-                        }
-                      }
-                      return Text(
-                        formattedDate,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[400],
-                          // Un color sutil para la fecha
-                          fontStyle: FontStyle.italic,
-                        ),
-                      );
+                Builder(builder: (context) {
+                  String formattedDate = l10n.training_date_unknown;
+                  if (widget.lastLog!['dateTime'] != null) {
+                    try {
+                      DateTime dt = DateTime.parse(widget.lastLog!['dateTime']);
+                      formattedDate =
+                          DateFormat.yMMMMd(l10n.localeName).format(dt);
+                    } catch (e) {
+                      print(l10n.training_error_format);
                     }
-                ),
+                  }
+                  return Text(
+                    formattedDate,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[400],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  );
+                }),
                 SizedBox(height: 8),
                 LogRecordTable(log: widget.lastLog!),
-                // Usar el nuevo método para la tabla
                 SizedBox(height: 24),
-              ] else
-                ...[
-                  // <<< INICIO DEL NUEVO BLOQUE "else" >>>
-                  Text(l10n.training_register, style: Theme
-                      .of(context)
-                      .textTheme
-                      .titleMedium),
-                  SizedBox(height: 8),
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20.0),
-                      child: Text(
-                        l10n.training_register_error,
-                        // <<< TU NUEVO MENSAJE LOCALIZADO
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                          fontStyle: FontStyle.italic,
-                        ),
-                        textAlign: TextAlign.center,
+              ] else ...[
+                Text(l10n.training_register,
+                    style: Theme.of(context).textTheme.titleMedium),
+                SizedBox(height: 8),
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20.0),
+                    child: Text(
+                      l10n.training_register_error,
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontStyle: FontStyle.italic,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  SizedBox(height: 24),
-                  // <<< FIN DEL NUEVO BLOQUE "else" >>>
-                ],
-              ElevatedButton(onPressed: _confirmAndSaveData,
+                ),
+                SizedBox(height: 24),
+              ],
+              ElevatedButton(
+                  onPressed: _confirmAndSaveData,
                   child: Text(l10n.training_update),
                   style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 12))),
-            ]
-        ),
+            ]),
       ),
     );
   }
