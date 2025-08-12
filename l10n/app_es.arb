@@ -262,7 +262,7 @@
   "training_unselect_error": "No se puede deseleccionar un ejercicio con datos ingresados.",
   "training_unselect_title": "Acción no permitida",
   "training_progress_info_title": "¿Qué significa este ícono?",
-  "training_progress_info_content": "Refleja tu rendimiento en esta serie comparado con el último registro de este ejercicio:\n\n ✔️  ¡Mejora! Superaste el peso o las repeticiones.\n\n ❌  Retroceso. Menor peso o repeticiones que la última vez.\n\n ➖  Rendimiento igual o sin registro previo. \n\n\n Nota: si agrega una más series mostrara justo en las series donde se anoto los registros",
+  "training_progress_info_content": "Refleja tu rendimiento en esta serie comparado con el último registro de este ejercicio:\n\n ✔️  ¡Mejora! Superaste el peso o las repeticiones.\n\n ❌  Retroceso. Menor peso o repeticiones que la última vez.\n\n ➖  Rendimiento igual o sin registro previo. \n\n\nNota: si agrega una o más series, se visualizará exactamente en las series donde se registraron los datos anteriormente.",
 
   "templateNameCannotBeEmpty": "El nombre de la plantilla no puede estar vacío.",
   "template_delete": "Selecciona Plantilla a Borrar",
