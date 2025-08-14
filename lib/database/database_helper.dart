@@ -24,7 +24,7 @@ class DatabaseHelper {
     final path = join(documentsDirectory.path, filePath);
     return await openDatabase(
       path,
-      version: 7,
+      version: 8,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -105,7 +105,13 @@ class DatabaseHelper {
       FOREIGN KEY (session_id) REFERENCES training_sessions(id) ON DELETE CASCADE
     );
   ''');
-
+    await db.execute('''
+  CREATE TABLE user_preferences (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    preference_key TEXT NOT NULL,
+    preference_value TEXT NOT NULL
+  )
+''');
     await _synchronizePredefinedData(db);
     print("Base de datos creada y datos predefinidos sincronizados.");
   }
@@ -129,6 +135,18 @@ class DatabaseHelper {
       print("Migración a v4: Resincronizando datos para corregir enlaces de plantillas...");
       await _synchronizePredefinedData(db);
       print("Migración a v4 completada.");
+    }
+    // Esta migración se ejecutará para cualquier usuario con una versión inferior a 8.
+    if (oldVersion < 8) {
+      print("Migración a v8: Creando la tabla user_preferences...");
+      await db.execute('''
+      CREATE TABLE IF NOT EXISTS user_preferences (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        preference_key TEXT NOT NULL,
+        preference_value TEXT NOT NULL
+      )
+    ''');
+      print("Migración a v8 completada.");
     }
   }
 
@@ -503,7 +521,91 @@ class DatabaseHelper {
   ''';
     return await db.rawQuery(sql, [sessionId]);
   }
+  /// Añade un ejercicio a la lista de no deseados.
+  Future<void> addDislikedExercise(String exerciseName) async {
+    final db = await database;
+    // Evita duplicados
+    await db.delete('user_preferences',
+        where: 'preference_key = ? AND preference_value = ?',
+        whereArgs: ['disliked_exercise', exerciseName.trim().toLowerCase()]);
 
+    await db.insert('user_preferences', {
+      'preference_key': 'disliked_exercise',
+      'preference_value': exerciseName.trim().toLowerCase(),
+    });
+  }
 
+  /// Obtiene la lista de todos los ejercicios no deseados.
+  Future<List<String>> getDislikedExercises() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'user_preferences',
+      where: 'preference_key = ?',
+      whereArgs: ['disliked_exercise'],
+    );
+    return List.generate(maps.length, (i) {
+      return maps[i]['preference_value'] as String;
+    });
+  }
+  /// Guarda o actualiza una preferencia de valor único (como el objetivo o el equipo).
+  Future<void> setPreference(String key, String value) async {
+    final db = await database;
+    await db.delete('user_preferences', where: 'preference_key = ?', whereArgs: [key]);
+    await db.insert('user_preferences', {
+      'preference_key': key,
+      'preference_value': value.trim().toLowerCase(),
+    });
+  }
+
+  /// Obtiene una preferencia de valor único.
+  Future<String?> getPreference(String key) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'user_preferences',
+      where: 'preference_key = ?',
+      whereArgs: [key],
+      limit: 1,
+    );
+    if (maps.isNotEmpty) {
+      return maps.first['preference_value'] as String;
+    }
+    return null;
+  }
+
+// --- MÉTODOS PARA GESTIONAR LISTAS DE PREFERENCIAS (EJERCICIOS/MÚSCULOS) ---
+
+  /// Añade un valor a una lista de preferencias (ej. ejercicios gustados, músculos favoritos).
+  Future<void> addPreferenceToList(String key, String value) async {
+    final db = await database;
+    // Evita duplicados
+    final existing = await db.query('user_preferences',
+        where: 'preference_key = ? AND preference_value = ?',
+        whereArgs: [key, value.trim().toLowerCase()]);
+    if (existing.isEmpty) {
+      await db.insert('user_preferences', {
+        'preference_key': key,
+        'preference_value': value.trim().toLowerCase(),
+      });
+    }
+  }
+
+  /// Elimina un valor de una lista de preferencias.
+  Future<void> removePreferenceFromList(String key, String value) async {
+    final db = await database;
+    await db.delete('user_preferences',
+        where: 'preference_key = ? AND preference_value = ?',
+        whereArgs: [key, value.trim().toLowerCase()]);
+  }
+
+  /// Obtiene todos los valores de una lista de preferencias.
+  Future<List<String>> getPreferenceList(String key) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'user_preferences',
+      where: 'preference_key = ?',
+      whereArgs: [key],
+    );
+    return List.generate(maps.length, (i) => maps[i]['preference_value'] as String);
+  }
 }
 
