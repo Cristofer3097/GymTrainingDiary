@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'database_exercise.dart';
+import '../ai_screen.dart';
 
 
 class DatabaseHelper {
@@ -24,7 +25,7 @@ class DatabaseHelper {
     final path = join(documentsDirectory.path, filePath);
     return await openDatabase(
       path,
-      version: 8,
+      version: 9,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -112,6 +113,15 @@ class DatabaseHelper {
     preference_value TEXT NOT NULL
   )
 ''');
+
+    await db.execute('''
+  CREATE TABLE ai_chat_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    message_text TEXT NOT NULL,
+    is_user INTEGER NOT NULL,
+    timestamp TEXT NOT NULL
+  )
+''');
     await _synchronizePredefinedData(db);
     print("Base de datos creada y datos predefinidos sincronizados.");
   }
@@ -148,6 +158,19 @@ class DatabaseHelper {
     ''');
       print("Migración a v8 completada.");
     }
+    // --- NUEVA MIGRACIÓN PARA LA VERSIÓN 9 ---
+    if (oldVersion < 9) {
+      print("Migración a v9: Creando la tabla ai_chat_history...");
+      await db.execute('''
+      CREATE TABLE IF NOT EXISTS ai_chat_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        message_text TEXT NOT NULL,
+        is_user INTEGER NOT NULL,
+        timestamp TEXT NOT NULL
+      )
+    ''');
+      print("Migración a v9 completada.");
+    }
   }
 
 
@@ -163,6 +186,7 @@ class DatabaseHelper {
           where: 'original_id = ? AND is_predefined = 1',
           whereArgs: [originalId],
           limit: 1
+
       );
 
       Map<String, dynamic> dataToInsertOrUpdate = {
@@ -606,6 +630,31 @@ class DatabaseHelper {
       whereArgs: [key],
     );
     return List.generate(maps.length, (i) => maps[i]['preference_value'] as String);
+  }
+
+  /// Guarda un nuevo mensaje del chat en la base de datos.
+  Future<void> saveChatMessage(ChatMessage message) async {
+    final db = await database;
+    await db.insert('ai_chat_history', {
+      'message_text': message.text,
+      'is_user': message.isUser ? 1 : 0,
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+  }
+
+  /// Obtiene el historial completo del chat, ordenado por fecha.
+  Future<List<ChatMessage>> getChatHistory() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'ai_chat_history',
+      orderBy: 'timestamp ASC',
+    );
+    return List.generate(maps.length, (i) {
+      return ChatMessage(
+        text: maps[i]['message_text'] as String,
+        isUser: maps[i]['is_user'] == 1,
+      );
+    });
   }
 }
 

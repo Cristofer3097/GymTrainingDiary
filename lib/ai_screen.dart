@@ -2,8 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import '../database/database_helper.dart'; // Asegúrate de importar tu helper
-
+import '../database/database_helper.dart';
+import 'main.dart';
+import 'widgets/app_bottom_nav_bar.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 // --- Modelo para los mensajes del chat ---
 class ChatMessage {
   final String text;
@@ -20,7 +22,7 @@ class AiScreen extends StatefulWidget {
 
 class _AiScreenState extends State<AiScreen> {
 
-  final genAI = GenerativeModel(model: 'gemini-1.5-flash-latest', apiKey: 'key');
+  final genAI = GenerativeModel(model: 'gemini-1.5-flash-latest', apiKey: dotenv.env['GEMINI_API_KEY']!);
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<ChatMessage> _messages = [];
@@ -28,21 +30,32 @@ class _AiScreenState extends State<AiScreen> {
 
 
   @override
+  @override
   void initState() {
     super.initState();
-    // --- Mensaje de bienvenida automático del bot ---
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() {
-          _messages.add(
-            ChatMessage(
-              text: "¡Hola! Soy GymGenie, tu entrenador personal. ¿Qué tipo de rutina te gustaría generar hoy? Puedes pedirme algo para hipertrofia, fuerza, o simplemente dime en qué músculos te quieres enfocar.",
-              isUser: false,
-            ),
+    _loadChatHistory();
+  }
+
+// AÑADE esta nueva función para cargar el historial
+  Future<void> _loadChatHistory() async {
+    final db = DatabaseHelper.instance;
+    final history = await db.getChatHistory();
+
+    if (mounted) {
+      setState(() {
+        _messages.addAll(history);
+        // Si el historial está vacío, añade el mensaje de bienvenida y guárdalo
+        if (_messages.isEmpty) {
+          final welcomeMessage = ChatMessage(
+            text: "¡Hola! Soy GymGenie, tu entrenador personal. ¿Qué tipo de rutina te gustaría generar hoy? Puedes pedirme algo para hipertrofia, fuerza, o simplemente dime en qué músculos te quieres enfocar.",
+            isUser: false,
           );
-        });
-      }
-    });
+          _messages.add(welcomeMessage);
+          db.saveChatMessage(welcomeMessage); // Guarda el mensaje de bienvenida
+        }
+      });
+      _scrollToBottom();
+    }
   }
 
   @override
@@ -65,20 +78,25 @@ class _AiScreenState extends State<AiScreen> {
     });
   }
   Future<void> _sendMessage() async {
-    if (_controller.text.isEmpty) return;
+    if (_controller.text.isEmpty || _isLoading) return;
 
-    final userMessage = _controller.text;
+    final userMessageText = _controller.text;
+    final userMessage = ChatMessage(text: userMessageText, isUser: true);
+    final db = DatabaseHelper.instance;
+
     setState(() {
-      _messages.add(ChatMessage(text: userMessage, isUser: true));
+      _messages.add(userMessage);
       _isLoading = true;
     });
     _controller.clear();
+    _scrollToBottom();
 
-    final db = DatabaseHelper.instance;
+    await db.saveChatMessage(userMessage);
+
 
     // --- 1. Lógica para interpretar la intención del usuario y actualizar la DB ---
     String confirmationMessage = "";
-    final userMessageLower = userMessage.toLowerCase();
+    final userMessageLower = userMessageText.toLowerCase();
 
     // El usuario quiere AÑADIR un ejercicio NO deseado
     if (userMessageLower.contains("no me gusta") || userMessageLower.contains("odio")) {
@@ -125,11 +143,14 @@ class _AiScreenState extends State<AiScreen> {
 
     // Si hubo un mensaje de confirmación, lo mostramos y no llamamos a la IA todavía.
     if (confirmationMessage.isNotEmpty) {
+      final botMessage = ChatMessage(text: confirmationMessage, isUser: false);
       setState(() {
-        _messages.add(ChatMessage(text: confirmationMessage, isUser: false));
+        _messages.add(botMessage);
         _isLoading = false;
       });
-      return; // Salimos de la función
+      await db.saveChatMessage(botMessage);
+      _scrollToBottom();
+      return;
     }
 
     // --- 2. Cargar TODAS las preferencias para construir el prompt ---
@@ -161,10 +182,13 @@ class _AiScreenState extends State<AiScreen> {
     try {
       final response = await genAI.generateContent([Content.text(prompt)]);
       final aiResponse = response.text ?? "Lo siento, no pude procesar tu solicitud.";
+      final botMessage = ChatMessage(text: aiResponse, isUser: false);
+
 
       setState(() {
         _messages.add(ChatMessage(text: aiResponse, isUser: false));
       });
+      await db.saveChatMessage(botMessage);
     } catch (e) {
       setState(() {
         _messages.add(ChatMessage(text: "Error: No se pudo conectar con la IA.", isUser: false));
@@ -180,7 +204,9 @@ class _AiScreenState extends State<AiScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Plan IA")),
+      appBar: AppBar(title: const Text("Plan IA")
+      ),
+      bottomNavigationBar: const AppBottomNavBar(activeRoute: 'Plan IA'),
       body: Column(
         children: [
           // --- Lista de mensajes del chat ---
@@ -226,7 +252,6 @@ class _AiScreenState extends State<AiScreen> {
   }
 }
 
-// --- WIDGET PARA LAS BURBUJAS DE CHAT ---
 class ChatMessageBubble extends StatelessWidget {
   final ChatMessage message;
   const ChatMessageBubble({super.key, required this.message});

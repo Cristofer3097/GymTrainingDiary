@@ -11,8 +11,9 @@ import '../utils/localization_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'settings.dart';
 import 'ai_screen.dart';
-
-
+import 'widgets/app_bottom_nav_bar.dart';
+import 'widgets/app_bottom_nav_bar.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Define los colores principales basados en la imagen y tus preferencias
 const Color amarilloPrincipal = Color(0xFFFFC107); // Un tono de amarillo vibrante (Ámbar)
@@ -24,6 +25,7 @@ const Color grisTextField = Color(0xFF2C2C2C); // Un gris para el fondo de campo
 
 Future<void> main() async { // Hacerla async y retornar Future<void>
   WidgetsFlutterBinding.ensureInitialized(); // Asegurar que los bindings estén inicializados
+  await dotenv.load(fileName: ".env");
   await initializeDateFormatting('es_ES', null); // Inicializar datos para español
   runApp(const MyApp());
 }
@@ -32,14 +34,15 @@ class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   static void setLocale(BuildContext context, Locale newLocale) {
-    _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
+    MyAppState? state = context.findAncestorStateOfType<MyAppState>();
     state?.setLocale(newLocale);
   }
+
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<MyApp> createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> {
   Locale _locale = const Locale('en');
   static const String _kLanguagePreferenceKey = 'user_preferred_language';
 
@@ -261,7 +264,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
@@ -270,6 +272,8 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true, //
 
       ),
+      bottomNavigationBar: const AppBottomNavBar(activeRoute: 'Menú'),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0), //
         child: Column(
@@ -405,43 +409,6 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
         ),
       ),
-            // --- INICIO DE LA NUEVA BARRA DE NAVEGACIÓN INFERIOR ---
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem(
-                    icon: Icons.auto_awesome,
-                    label: 'Plan IA',
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AiScreen()));
-                    },
-                  ),
-                  _buildNavItem(
-                    icon: Icons.calendar_month,
-                    label: l10n.calendar,
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarScreen()));
-                    },
-                  ),
-                  _buildNavItem(
-                    icon: Icons.lightbulb,
-                    label: l10n.tipsAndExtras,
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const TipsExtrasScreen()));
-                    },
-                  ),
-                  _buildNavItem(
-                    icon: Icons.settings,
-                    label: l10n.settings_title,
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => Settings(onLocaleChange: widget.onLocaleChange)));
-                    },
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
