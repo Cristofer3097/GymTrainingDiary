@@ -63,10 +63,10 @@ class AppBottomNavBar extends StatelessWidget {
           _buildNavItem(
             context: context,
             icon: Icons.auto_awesome,
-            label: 'Plan IA',
-            isActive: activeRoute == 'Plan IA',
+            label: l10n.ai_title,
+            isActive: activeRoute == l10n.ai_title,
             onPressed: () {
-              if (activeRoute == 'Plan IA') return;
+              if (activeRoute == l10n.ai_title) return;
               Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AiScreen()));
             },
           ),

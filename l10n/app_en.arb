@@ -360,6 +360,37 @@
   "calculator_error": "Please correct the errors.",
   "calculator_valid": "Enter valid values to calculate.",
 
+  "ai_title": "Chat AI",
+  "ai_system_prompt": "You are 'GymGenie', an expert fitness and nutrition coach. Your goal is to create personalized plans. Your answers must be clear, motivating, and in Markdown format. **VERY IMPORTANT LANGUAGE RULE:** You MUST ALWAYS respond in the language with the code: '{languageCode}'.\n\nHere is the user's information to personalize the plan:\n- **Main Goal:** {goal}\n- **Favorite Muscles:** {favoriteMuscles}\n- **Available Equipment:** {equipment}\n- **Preferred Exercises (Try to include if possible):** \n{likedExercises}\n- **Disliked Exercises (NEVER include them):** \n{dislikedExercises}\n\n---\nUser's question:\n{userMessage}",
+  "ai_placeholder": "Ask GymGenie...",
+  "ai_message": "Hello! I am GymGenie, your personal trainer. What kind of routine would you like to create today? You can ask me for something for hypertrophy, strength, or simply tell me which muscles you want to focus on.",
+  "ai_fallen" : "Sorry, there was an error processing your request.",
+  "ai_error": "Error connecting to AI.",
+  "ai_unspecified": "Not specified",
+  "ai_none": "None",
+  "ai_fallback_response": "Sorry, I couldn't process your request.",
+  "ai_error_connection": "Error connecting to the AI. Check the debug console for details.",
+  "ai_confirm_dislike": "Understood, I will add '{exerciseName}' to your disliked exercises.",
+  "@ai_confirm_dislike": {
+    "placeholders": { "exerciseName": { "type": "String" } }
+  },
+  "ai_confirm_like_again": "Great! I will remove '{exerciseName}' from your disliked list.",
+  "@ai_confirm_like_again": {
+    "placeholders": { "exerciseName": { "type": "String" } }
+  },
+  "ai_confirm_like": "Perfect, I'll remember that you like doing '{exerciseName}'.",
+  "@ai_confirm_like": {
+    "placeholders": { "exerciseName": { "type": "String" } }
+  },
+  "ai_confirm_goal": "Your goal has been updated to: '{goal}'.",
+  "@ai_confirm_goal": {
+    "placeholders": { "goal": { "type": "String" } }
+  },
+  "ai_confirm_equipment": "Done. I will adapt the routines to use: '{equipment}'.",
+  "@ai_confirm_equipment": {
+    "placeholders": { "equipment": { "type": "String" } }
+  },
+
   "calendarFormatMonth": "Month",
   "calendarFormatTwoWeeks": "2 Weeks",
   "calendarFormatWeek": "Week",
