@@ -1,17 +1,11 @@
 // En ai_screen.dart (versión simplificada para mostrar la lógica)
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../database/database_helper.dart';
 import 'main.dart';
 import 'widgets/app_bottom_nav_bar.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:google_mlkit_language_id/google_mlkit_language_id.dart';
-
-
 // --- Modelo para los mensajes del chat ---
 class ChatMessage {
   final String text;
@@ -34,23 +28,15 @@ class _AiScreenState extends State<AiScreen> {
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
 
-  final _languageIdentifier = LanguageIdentifier(confidenceThreshold: 0.5);
 
+  @override
   @override
   void initState() {
     super.initState();
     _loadChatHistory();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    _scrollController.dispose();
-    _languageIdentifier.close();
-    super.dispose();
-  }
-
-// función para cargar el historial
+// AÑADE esta nueva función para cargar el historial
   Future<void> _loadChatHistory() async {
     final db = DatabaseHelper.instance;
     final history = await db.getChatHistory();
@@ -58,86 +44,38 @@ class _AiScreenState extends State<AiScreen> {
     if (mounted) {
       setState(() {
         _messages.addAll(history);
+        // Si el historial está vacío, añade el mensaje de bienvenida y guárdalo
         if (_messages.isEmpty) {
           final welcomeMessage = ChatMessage(
-            text: "¡Hola! Soy GymGenie. ¿Qué rutina te gustaría generar hoy?",
+            text: "¡Hola! Soy GymGenie, tu entrenador personal. ¿Qué tipo de rutina te gustaría generar hoy? Puedes pedirme algo para hipertrofia, fuerza, o simplemente dime en qué músculos te quieres enfocar.",
             isUser: false,
           );
           _messages.add(welcomeMessage);
-          db.saveChatMessage(welcomeMessage);
+          db.saveChatMessage(welcomeMessage); // Guarda el mensaje de bienvenida
         }
       });
-      _scrollToBottom(initial: true);
+      _scrollToBottom();
     }
   }
 
-
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   // --- Función para hacer scroll automático hacia el último mensaje ---
-  void _scrollToBottom({bool initial = false}) {
-    // WidgetsBinding asegura que el scroll ocurra después de que la UI se haya renderizado.
+  void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
-        if (initial) {
-          // Para la carga inicial, saltamos directamente al final sin animación.
-
-          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-        } else {
-          // Para nuevos mensajes, usamos una animación suave.
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        }
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
       }
     });
-  }
-
-  // --- NUEVA FUNCIÓN PARA CONSTRUIR EL PROMPT EN ESPAÑOL ---
-  String _buildSpanishPrompt({
-    required Map<String, dynamic> prefs,
-    required String userMessage,
-  }) {
-    return """
-      Eres "GymGenie", un entrenador personal experto en fitness y nutrición.
-      Tu objetivo es crear planes personalizados. Tus respuestas deben ser claras, motivadoras y en formato Markdown.
-      **REGLA MUY IMPORTANTE:** Debes responder SIEMPRE en español.
-
-      Aquí tienes la información sobre el usuario para personalizar el plan:
-      - **Objetivo Principal:** ${prefs['goal']}
-      - **Músculos Favoritos:** ${prefs['favoriteMuscles']}
-      - **Equipo Disponible:** ${prefs['equipment']}
-      - **Ejercicios Preferidos (Intenta incluirlos si es posible):**\n${prefs['likedExercises']}
-      - **Ejercicios No Deseados (NUNCA los incluyas):**\n${prefs['dislikedExercises']}
-
-      ---
-      Pregunta del usuario:
-      $userMessage
-    """;
-  }
-
-  // --- NUEVA FUNCIÓN PARA CONSTRUIR EL PROMPT EN INGLÉS ---
-  String _buildEnglishPrompt({
-    required Map<String, dynamic> prefs,
-    required String userMessage,
-  }) {
-    return """
-      You are 'GymGenie', an expert fitness and nutrition coach.
-      Your goal is to create personalized plans. Your answers must be clear, motivating, and in Markdown format.
-      **VERY IMPORTANT RULE:** You MUST ALWAYS respond in English.
-
-      Here is the user's information to personalize the plan:
-      - **Main Goal:** ${prefs['goal']}
-      - **Favorite Muscles:** ${prefs['favoriteMuscles']}
-      - **Available Equipment:** ${prefs['equipment']}
-      - **Preferred Exercises (Try to include if possible):**\n${prefs['likedExercises']}
-      - **Disliked Exercises (NEVER include them):**\n${prefs['dislikedExercises']}
-
-      ---
-      User's question:
-      $userMessage
-    """;
   }
   Future<void> _sendMessage() async {
     if (_controller.text.isEmpty || _isLoading) return;
@@ -145,7 +83,6 @@ class _AiScreenState extends State<AiScreen> {
     final userMessageText = _controller.text;
     final userMessage = ChatMessage(text: userMessageText, isUser: true);
     final db = DatabaseHelper.instance;
-    final l10n = AppLocalizations.of(context)!;
 
     setState(() {
       _messages.add(userMessage);
@@ -158,14 +95,9 @@ class _AiScreenState extends State<AiScreen> {
 
 
     // --- 1. Lógica para interpretar la intención del usuario y actualizar la DB ---
-    final detectedLanguage = await _languageIdentifier.identifyLanguage(userMessageText);
-    final languageForAI = (detectedLanguage == 'und' || detectedLanguage.isEmpty)
-        ? l10n.localeName
-        : detectedLanguage;
-
-
     String confirmationMessage = "";
     final userMessageLower = userMessageText.toLowerCase();
+
     // El usuario quiere AÑADIR un ejercicio NO deseado
     if (userMessageLower.contains("no me gusta") || userMessageLower.contains("odio")) {
       final exercise = userMessageLower.split(RegExp(r'no me gusta|odio')).last.trim();
@@ -222,40 +154,44 @@ class _AiScreenState extends State<AiScreen> {
     }
 
     // --- 2. Cargar TODAS las preferencias para construir el prompt ---
-    final prefs = {
-      'goal': await db.getPreference('user_goal') ?? l10n.ai_unspecified,
-      'equipment': await db.getPreference('equipment_available') ?? l10n.ai_unspecified,
-      'favoriteMuscles': (await db.getPreferenceList('favorite_muscle')).isNotEmpty
-          ? (await db.getPreferenceList('favorite_muscle')).join(', ') : l10n.ai_none,
-      'likedExercises': (await db.getPreferenceList('liked_exercise')).isNotEmpty
-          ? '- ' + (await db.getPreferenceList('liked_exercise')).join('\n- ') : l10n.ai_none,
-      'dislikedExercises': (await db.getPreferenceList('disliked_exercise')).isNotEmpty
-          ? '- ' + (await db.getPreferenceList('disliked_exercise')).join('\n- ') : l10n.ai_none,
-    };
+    final goal = await db.getPreference('user_goal') ?? "No especificado";
+    final equipment = await db.getPreference('equipment_available') ?? "No especificado";
+    final likedExercises = await db.getPreferenceList('liked_exercise');
+    final dislikedExercises = await db.getPreferenceList('disliked_exercise');
+    final favoriteMuscles = await db.getPreferenceList('favorite_muscle');
 
-    // --- 3. SELECCIONAR Y CONSTRUIR EL PROMPT FINAL ---
-    String finalPrompt;
-    if (languageForAI == 'es') {
-      finalPrompt = _buildSpanishPrompt(prefs: prefs, userMessage: userMessageText);
-    } else {
-      // Por defecto, usamos inglés para cualquier otro idioma detectado
-      finalPrompt = _buildEnglishPrompt(prefs: prefs, userMessage: userMessageText);
-    }
+    // --- 3. Construir el Super Prompt ---
+    final prompt = """
+    Eres "GymGenie", un entrenador personal experto en fitness y nutrición.
+    Tu objetivo es crear planes personalizados basados en la información del usuario.
+    Tus respuestas deben ser claras, motivadoras y en formato Markdown.
+
+    Aquí tienes la información sobre el usuario para personalizar el plan:
+    - **Objetivo Principal:** $goal
+    - **Músculos Favoritos:** ${favoriteMuscles.isNotEmpty ? favoriteMuscles.join(', ') : "Ninguno"}
+    - **Equipo Disponible:** $equipment
+    - **Ejercicios Preferidos (Intenta incluirlos si es posible):** ${likedExercises.isNotEmpty ? '- ' + likedExercises.join('\n- ') : "Ninguno"}
+    - **Ejercicios No Deseados (NUNCA los incluyas):** ${dislikedExercises.isNotEmpty ? '- ' + dislikedExercises.join('\n- ') : "Ninguno"}
+
+    ---
+    Pregunta del usuario:
+    $userMessage
+  """;
 
     // --- 4. Llamar a la API y mostrar la respuesta ---
     try {
-      final response = await genAI.generateContent([Content.text(finalPrompt)]);
-      final aiResponse = response.text ?? l10n.ai_fallen;
+      final response = await genAI.generateContent([Content.text(prompt)]);
+      final aiResponse = response.text ?? "Lo siento, no pude procesar tu solicitud.";
       final botMessage = ChatMessage(text: aiResponse, isUser: false);
 
 
       setState(() {
-        _messages.add(botMessage);
+        _messages.add(ChatMessage(text: aiResponse, isUser: false));
       });
       await db.saveChatMessage(botMessage);
     } catch (e) {
       setState(() {
-        _messages.add(ChatMessage(text: l10n.ai_error, isUser: false));
+        _messages.add(ChatMessage(text: "Error: No se pudo conectar con la IA.", isUser: false));
       });
     } finally {
       setState(() {
@@ -267,13 +203,10 @@ class _AiScreenState extends State<AiScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-          title: Text(l10n.ai_title)
-
+      appBar: AppBar(title: const Text("Plan IA")
       ),
-      bottomNavigationBar: AppBottomNavBar(activeRoute: l10n.ai_title),
+      bottomNavigationBar: const AppBottomNavBar(activeRoute: 'Plan IA'),
       body: Column(
         children: [
           // --- Lista de mensajes del chat ---
@@ -302,7 +235,7 @@ class _AiScreenState extends State<AiScreen> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration:  InputDecoration(hintText: l10n.ai_placeholder),
+                    decoration: const InputDecoration(hintText: "Pregúntale a GymGenie..."),
                     onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
