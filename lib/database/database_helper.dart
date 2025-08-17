@@ -647,7 +647,7 @@ class DatabaseHelper {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'ai_chat_history',
-      orderBy: 'timestamp ASC',
+      orderBy: 'timestamp ASC'
     );
     return List.generate(maps.length, (i) {
       return ChatMessage(

@@ -63,10 +63,10 @@ class AppBottomNavBar extends StatelessWidget {
           _buildNavItem(
             context: context,
             icon: Icons.auto_awesome,
-            label: 'Plan IA',
-            isActive: activeRoute == 'Plan IA',
+            label: l10n.ai_title,
+            isActive: activeRoute == l10n.ai_title,
             onPressed: () {
-              if (activeRoute == 'Plan IA') return;
+              if (activeRoute == l10n.ai_title) return;
               Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AiScreen()));
             },
           ),
@@ -83,10 +83,10 @@ class AppBottomNavBar extends StatelessWidget {
           _buildNavItem(
             context: context,
             icon: Icons.home_rounded, // Un ícono de inicio
-            label: menuLabel,
-            isActive: activeRoute == menuLabel,
+            label: l10n.diary,
+            isActive: activeRoute == l10n.diary,
             onPressed: () {
-              if (activeRoute == menuLabel || myAppState == null) return;
+              if (activeRoute == l10n.diary || myAppState == null) return;
               // Navega de vuelta a la pantalla principal
               Navigator.pushReplacement(
                 context,

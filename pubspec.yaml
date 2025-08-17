@@ -50,6 +50,8 @@ dependencies:
   diacritic: ^0.1.6
   google_generative_ai: ^0.4.0
   flutter_dotenv: ^5.1.0
+  flutter_markdown: ^0.7.1
+  google_mlkit_language_id: ^0.10.0
 
 
   # The following adds the Cupertino Icons font to your application.

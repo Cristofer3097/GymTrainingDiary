@@ -272,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true, //
 
       ),
-      bottomNavigationBar: const AppBottomNavBar(activeRoute: 'Menú'),
+      bottomNavigationBar: AppBottomNavBar(activeRoute: l10n.diary),
 
       body: Padding(
         padding: const EdgeInsets.all(16.0), //
