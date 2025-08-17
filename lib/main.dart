@@ -5,15 +5,13 @@ import '../database/database_helper.dart'; //
 import 'package:intl/date_symbol_data_local.dart';
 import 'extras.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; // Importa esto
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../utils/localization_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'settings.dart';
-import 'ai_screen.dart';
-import 'widgets/app_bottom_nav_bar.dart';
-import 'widgets/app_bottom_nav_bar.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+
 
 // Define los colores principales basados en la imagen y tus preferencias
 const Color amarilloPrincipal = Color(0xFFFFC107); // Un tono de amarillo vibrante (Ámbar)
@@ -25,7 +23,6 @@ const Color grisTextField = Color(0xFF2C2C2C); // Un gris para el fondo de campo
 
 Future<void> main() async { // Hacerla async y retornar Future<void>
   WidgetsFlutterBinding.ensureInitialized(); // Asegurar que los bindings estén inicializados
-  await dotenv.load(fileName: ".env");
   await initializeDateFormatting('es_ES', null); // Inicializar datos para español
   runApp(const MyApp());
 }
@@ -34,15 +31,14 @@ class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   static void setLocale(BuildContext context, Locale newLocale) {
-    MyAppState? state = context.findAncestorStateOfType<MyAppState>();
+    _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
     state?.setLocale(newLocale);
   }
-
   @override
-  State<MyApp> createState() => MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
-class MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> {
   Locale _locale = const Locale('en');
   static const String _kLanguagePreferenceKey = 'user_preferred_language';
 
@@ -184,23 +180,20 @@ class MyAppState extends State<MyApp> {
           ),
           prefixIconColor: Colors.grey[400], // Color para iconos de prefijo
         ),
-        navigationBarTheme: NavigationBarThemeData( // <-- NUEVO: Estilo para la barra de navegación
-          backgroundColor: colorAppBar,
-          indicatorColor: amarilloPrincipal,
-          labelTextStyle: MaterialStateProperty.resolveWith((states) {
-            if (states.contains(MaterialState.selected)) {
-              return const TextStyle(color: amarilloPrincipal, fontSize: 12, fontWeight: FontWeight.w500);
-            }
-            return TextStyle(color: Colors.grey[400], fontSize: 12);
-          }),
-          iconTheme: MaterialStateProperty.resolveWith((states) {
-            if (states.contains(MaterialState.selected)) {
-              return const IconThemeData(color: negroBoton);
-            }
-            return IconThemeData(color: Colors.grey[400]);
-          }),
+        listTileTheme: ListTileThemeData(
+          iconColor: amarilloPrincipal, // Color de iconos en ListTiles
+          textColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          // tileColor: grisContenedor.withOpacity(0.5), // Opcional: si quieres un fondo para todos los ListTiles
+        ),
+        dividerTheme: DividerThemeData(
+          color: Colors.grey[700],
+          thickness: 0.5,
         ),
       ),
+
+
+      // ...
       localizationsDelegates: AppLocalizations.localizationsDelegates, // Usar el generado
       supportedLocales: AppLocalizations.supportedLocales,       // Usar el generado
       locale: _locale, // El locale actual del estado
@@ -209,7 +202,7 @@ class MyAppState extends State<MyApp> {
     );
   }
 }
-// ---- WIDGET PRINCIPAL DE NAVEGACIÓN ----
+
 class HomeScreen extends StatefulWidget {
   final void Function(Locale) onLocaleChange;
   const HomeScreen({Key? key, required this.onLocaleChange}) : super(key: key);
@@ -218,62 +211,43 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Map<String, dynamic>> templates = [];
+  List<Map<String, dynamic>> templates = []; //
 
   @override
   void initState() {
     super.initState();
-    _loadTemplates();
+    _loadTemplates(); //
   }
 
+
+
   void _loadTemplates() async {
-    await DatabaseHelper.instance.database;
+    await DatabaseHelper.instance.database; // Asegura que la DB esté abierta
     final db = DatabaseHelper.instance;
     final tpls = await db.getAllTemplates();
     if (mounted) {
       setState(() {
-        templates = tpls;
+        templates = tpls; //
       });
     }
   }
 
-
-// --- WIDGET  PARA LOS BOTONES DE NAVEGACIÓN ---
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return Expanded(
-      child: TextButton(
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        onPressed: onPressed,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 20),
-            const SizedBox(height: 4),
-            Text(label, style: const TextStyle(fontSize: 12)),
-          ],
-        ),
-      ),
-    );
-  }
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         //title: const Text('Gym Diary'), // Título de la AppBar
         title: Text(l10n.appTitle),
         centerTitle: true, //
-
+        // Puedes añadir un menú lateral (Drawer) o acciones si lo deseas:
+        // leading: IconButton(icon: Icon(Icons.menu), onPressed: () { /* Lógica del menú */ }),
+        // actions: [
+        //   IconButton(icon: Icon(Icons.search), onPressed: () { /* Lógica de búsqueda */ }),
+        //   IconButton(icon: Icon(Icons.more_vert), onPressed: () { /* Lógica de más opciones */ }),
+        // ],
       ),
-      bottomNavigationBar: AppBottomNavBar(activeRoute: l10n.diary),
-
       body: Padding(
         padding: const EdgeInsets.all(16.0), //
         child: Column(
@@ -293,7 +267,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   _loadTemplates(); //
                 }
               },
-
+              // El estilo del botón se toma del tema global.
+              // Si necesitas un tamaño específico, puedes usar style.merge.
+              // style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
+              //   minimumSize: MaterialStateProperty.all(const Size(double.infinity, 50)),
+              // ),
+              //child: const Text('Iniciar Entrenamiento'), //
               child: Text(l10n.startTraining),
             ),
             const SizedBox(height: 24),
@@ -409,158 +388,92 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
         ),
       ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+            const SizedBox(height: 20), // Un poco más de espacio antes de la fila de botones
 
-// --- VISTA PRINCIPAL (CONTENIDO DE LA PRIMERA PESTAÑA) ---
-class HomeView extends StatelessWidget {
-  final List<Map<String, dynamic>> templates;
-  final VoidCallback onLoadTemplates; // Callback para recargar plantillas
-
-  const HomeView({
-    Key? key,
-    required this.templates,
-    required this.onLoadTemplates,
-  }) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ElevatedButton(
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const TrainingScreen()),
-              );
-              if (result == true) {
-                onLoadTemplates();
-              }
-            },
-            child: Text(l10n.startTraining),
-          ),
-          const SizedBox(height: 24),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                color: grisContenedor,
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    l10n.templates,
-                    style: TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                    textAlign: TextAlign.center,
+            // --- FILA PARA BOTONES DE CALENDARIO Y CONSEJOS ---
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.calendar_month),
+                    label: Text(l10n.calendar),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CalendarScreen()),
+                      );
+                    },
                   ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: templates.isEmpty
-                        ? Center(
-                        child: Text(
-                          l10n.noTemplatesSaved,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey[500], fontSize: 15),
-                        ))
-                        : GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 2.2,
-                        ),
-                        itemCount: templates.length,
-                        itemBuilder: (context, index) {
-                          // ... (El código de GridView.builder se mantiene igual)
-                          final template = templates[index];
-                          final String displayTemplateName = getLocalizedTemplateName(context, template);
-                          final templateId = template['id'];
+                ),
+                const SizedBox(width: 12), // Espacio entre los botones
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.lightbulb_outline_rounded), // Icono para consejos
+                    label:
+                    Text(l10n.tipsAndExtras), // Etiqueta más corta para mejor ajuste
 
-                          if (templateId == null) {
-                            return Card(
-                                child: Center(
-                                    child: Text(l10n.template_id,
-                                        style: TextStyle(color: Theme.of(context).colorScheme.error))));
-                          }
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const TipsExtrasScreen()), // Navegar a la nueva pantalla
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
 
-                          return GestureDetector(
-                            onLongPress: () async {
-                              final confirm = await showDialog<bool>(
-                                context: context,
-                                builder: (ctx) => AlertDialog(
-                                  title: Text(l10n.template_question),
-                                  content: Text(l10n.template_question1(displayTemplateName)),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(ctx, false),
-                                      child: Text(l10n.cancel),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(ctx, true),
-                                      child: Text(l10n.deleteButton,
-                                          style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              if (confirm == true) {
-                                final db = DatabaseHelper.instance;
-                                await db.deleteTemplate(templateId);
-                                onLoadTemplates();
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(l10n.templateDeletedSuccessMessage(displayTemplateName)),
-                                      backgroundColor: Theme.of(context).cardTheme.color,
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                final db = DatabaseHelper.instance;
-                                final exercises = await db.getTemplateExercises(templateId);
+              height: 40, // Ajusta la altura según tu diseño
+              child: Stack(
+                children: [
+                  // Texto de versión centrado
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: CircleAvatar(
+                      radius: 20, // La mitad de la altura (40) para que encaje perfectamente
+                      backgroundColor: Colors.transparent, // Fondo transparente
+                      // Asegúrate de que la ruta a tu logo sea correcta
+                      backgroundImage: AssetImage('assets/images/logo.png'),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Text ("Version 1.0.1",
+                      style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
+                    ),
+                  ),
+                  // Botón de idioma a la derecha
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      icon: Icon(Icons.settings, color: theme.primaryColor),
+                      tooltip: l10n.settings_title, // Añade tooltip
+                      onPressed: () async {
+                        // Navega a la pantalla de configuración y espera un resultado.
+                        final result = await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(builder: (context) => Settings(
+                            onLocaleChange: widget.onLocaleChange,
+                          )),
+                        );
 
-                                final dynamic dialogResult = await showDialog(
-                                  context: context,
-                                  builder: (BuildContext dialogContext) {
-                                    return TemplatePreviewDialog(
-                                      templateId: templateId,
-                                      templateName: displayTemplateName,
-                                      exercises: exercises,
-                                    );
-                                  },
-                                );
-                                if (dialogResult == true && context.mounted) {
-                                  onLoadTemplates();
-                                }
-                              },
-                              child: Text(displayTemplateName, textAlign: TextAlign.center),
-                            ),
-                          );
-                        }),
+                        // Si el resultado es 'true', significa que se realizó una importación exitosa.
+                        if (result == true) {
+                          _loadTemplates(); // Recarga las plantillas en la pantalla principal.
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+      // --- FIN DE NUEVA FILA ---
+
+      const SizedBox(height: 10), // Espacio antes del crédito del creador
+          ],
+        ),
       ),
     );
   }

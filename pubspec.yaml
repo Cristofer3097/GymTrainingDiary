@@ -48,10 +48,6 @@ dependencies:
   file_picker: ^8.0.5
   archive: ^3.5.1
   diacritic: ^0.1.6
-  google_generative_ai: ^0.4.0
-  flutter_dotenv: ^5.1.0
-  flutter_markdown: ^0.7.1
-  google_mlkit_language_id: ^0.10.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -85,7 +81,6 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
-    - .env
     - assets/images/ # Asegúrate de que esta línea exista y apunte a tu carpeta
     - assets/exercises/
 

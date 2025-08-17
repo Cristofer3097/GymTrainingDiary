@@ -6,7 +6,7 @@
   "noTemplatesSaved": "No hay plantillas guardadas.\n¡Crea una nueva o guarda un entrenamiento!",
   "calendar": "Calendario",
   "tipsAndExtras": "Tips y Extras",
-  "diary": "Diario",
+
   "languageButtonLabel": "Idioma",
   "changeLanguageDialogTitle": "Cambiar Idioma",
   "languageEnglish": "English",
@@ -457,55 +457,6 @@
   "settings_permission_title": "Permiso Requerido",
   "settings_permission_content": "Para exportar o importar datos, la aplicación necesita acceso a su almacenamiento. Por favor, habilite el permiso en la configuración de la aplicación.",
   "settings_open_settings_button": "Abrir Configuración",
-
-  "ai_title": "Chat AI",
-  "ai_placeholder": "Pregúntale a GymGenie...",
-  "ai_message": "¡Hola! Soy GymGenie, tu entrenador personal. ¿Qué tipo de rutina te gustaría generar hoy? Puedes pedirme algo para hipertrofia, fuerza, o simplemente dime en qué músculos te quieres enfocar.",
-  "ai_unspecified": "No especificado",
-  "ai_none": "Ninguno",
-  "ai_system_prompt": "Eres 'GymGenie', un entrenador personal experto en fitness y nutrición. Tu objetivo es crear planes personalizados. Tus respuestas deben ser claras, motivadoras y en formato Markdown. **REGLA DE IDIOMA MUY IMPORTANTE:** Debes responder SIEMPRE en el idioma con el código: '{languageCode}'.\n\nAquí tienes la información sobre el usuario para personalizar el plan:\n- **Objetivo Principal:** {goal}\n- **Músculos Favoritos:** {favoriteMuscles}\n- **Equipo Disponible:** {equipment}\n- **Ejercicios Preferidos (Intenta incluirlos si es posible):** \n{likedExercises}\n- **Ejercicios No Deseados (NUNCA los incluyas):** \n{dislikedExercises}\n\n---\nPregunta del usuario:\n{userMessage}",
-  "ai_fallback_response": "Lo siento, no pude procesar tu solicitud.",
-  "ai_error_connection": "Error al conectar con la IA. Revisa la consola para más detalles.",
-  "ai_confirm_dislike": "Entendido, añadiré '{exerciseName}' a los ejercicios que no te gustan.",
-  "@ai_confirm_dislike": {
-    "placeholders": {
-      "exerciseName": {
-        "type": "String"
-      }
-    }
-  },
-  "ai_confirm_like_again": "¡Genial! Quitaré '{exerciseName}' de tu lista de no deseados.",
-  "@ai_confirm_like_again": {
-    "placeholders": {
-      "exerciseName": {
-        "type": "String"
-      }
-    }
-  },
-  "ai_confirm_like": "Perfecto, recordaré que te gusta hacer '{exerciseName}'.",
-  "@ai_confirm_like": {
-    "placeholders": {
-      "exerciseName": {
-        "type": "String"
-      }
-    }
-  },
-  "ai_confirm_goal": "Tu objetivo ha sido actualizado a: '{goal}'.",
-  "@ai_confirm_goal": {
-    "placeholders": {
-      "goal": {
-        "type": "String"
-      }
-    }
-  },
-  "ai_confirm_equipment": "Hecho. Adaptaré las rutinas para usar: '{equipment}'.",
-  "@ai_confirm_equipment": {
-    "placeholders": {
-      "equipment": {
-        "type": "String"
-      }
-    }
-  },
 
   "category_all": "Todas las Categorías",
   "category_chest": "Pecho",

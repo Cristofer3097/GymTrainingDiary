@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'rm_calculator_dialog.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'widgets/app_bottom_nav_bar.dart';
+
 
 class TipsExtrasScreen extends StatelessWidget {
   const TipsExtrasScreen({Key? key}) : super(key: key);
@@ -76,7 +76,6 @@ class TipsExtrasScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(l10n.tipsAndExtras),
       ),
-      bottomNavigationBar: AppBottomNavBar(activeRoute: l10n.tipsAndExtras),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
