@@ -7,6 +7,10 @@ import '../database/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../training_screen.dart';
 import '../utils/localization_utils.dart';
+import 'widgets/app_bottom_nav_bar.dart';
+
+import '../main.dart';
+
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
@@ -225,6 +229,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
       appBar: AppBar(
         title: Text(l10n.calendar_title),
       ),
+      bottomNavigationBar: AppBottomNavBar(activeRoute: l10n.calendar),
+
       body: Column(
         children: [
           TableCalendar(
