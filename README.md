@@ -9,7 +9,7 @@ Detailed Workout Logging:
 -For each exercise, record the number of sets, reps per set, weight lifted and unit (kg/lb).
 -Include specific notes for each exercise, such as feel, technique or settings.
 
-![image](https://github.com/user-attachments/assets/472a2e91-8cac-4904-bb87-8d1932422beb)
+<img width="316" height="662" alt="image" src="https://github.com/user-attachments/assets/3ff19f7a-a661-48d2-be94-1b65e7ac68b3" />
 
 
 Comprehensive and Customizable Exercise Database:
@@ -19,6 +19,13 @@ Comprehensive and Customizable Exercise Database:
 -Edit the information of the exercises you have created manually.
 
 ![image](https://github.com/user-attachments/assets/8f72e737-ac69-4301-8ad9-c3f92c95c2ea)
+
+AI Personal Trainer:
+-With AI-powered chat, receive training and nutrition plans that are fully personalized and tailored to you.
+-The AI learns and remembers your preferences, including your main goals (hypertrophy, strength), available equipment, and the specific exercises you like or want to avoid.
+-All conversations with the AI are saved on your device, allowing you to have a very good conversation.
+
+<img width="327" height="666" alt="image" src="https://github.com/user-attachments/assets/84d49c23-6025-4cbb-95a9-cf9e03bec3ee" />
 
 
 Advanced Template Management:
