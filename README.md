@@ -8,7 +8,7 @@ Detailed Workout Logging:
 -Easily add workouts from a pre-defined database or create your own.
 -For each exercise, record the number of sets, reps per set, weight lifted and unit (kg/lb).
 -Include specific notes for each exercise, such as feel, technique or settings.
-
+<br>
 <img width="316" height="662" alt="image" src="https://github.com/user-attachments/assets/3ff19f7a-a661-48d2-be94-1b65e7ac68b3" />
 
 
