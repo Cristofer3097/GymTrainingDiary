@@ -27,7 +27,7 @@ Advanced Template Management:
 -Access a calendar where you can see the days you have trained and review the details of those sessions.
 -Useful Tools:
 
-![image](https://github.com/user-attachments/assets/ff9a700c-d072-4752-bc0d-411e20a0cd55)
+<img width="369" height="672" alt="image" src="https://github.com/user-attachments/assets/1888a0bd-568d-4ecc-9295-927ff96aaddd" />
 
 Tips and Extras: a section with quick tips on training, nutrition and rest and RM Calculator.
 
