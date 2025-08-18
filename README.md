@@ -40,6 +40,6 @@ Tips and Extras: a section with quick tips on training, nutrition and rest and R
 
 
 
-[Gym Diary v1.0 - Versión](https://drive.google.com/file/d/1gmAQG3LZMo-ihn5wIqsQ7tNL6UMMr1ak/view?usp=sharing)
+[Gym Diary v1.0 - Versión](https://drive.google.com/file/d/1pbTLc5WdfPURrsdgiDlqsrCsYaEyg4Qm/view?usp=sharing)
 
   
