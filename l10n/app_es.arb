@@ -660,7 +660,9 @@
   "exercise_66_description":"El encogimiento de hombros es un ejercicio de fortalecimiento que se dirige principalmente a los músculos trapecios de la parte superior de la espalda y el cuello, lo que contribuye a mejorar la postura y la fuerza de la parte superior del cuerpo.",
   "exercise_67_name": "Curl de Martillo",
   "exercise_67_description":"Curl de martillo es un ejercicio de entrenamiento de fuerza que se dirige principalmente a los bíceps y los antebrazos, aumentando la fuerza de la parte superior del cuerpo y mejorando la definición muscular. ",
-
+  "exercise_68_name": "Jalón individual",
+  "exercise_68_description":"El jalon individual es un ejercicio de desarrollo de fuerza que se dirige a los músculos dorsal ancho de la espalda, mejorando el tono y la definición de los músculos.",  "exercise_69_name": "Sentadilla Frontal",
+  "exercise_69_description":"La sentadilla frontal es un ejercicio de entrenamiento de fuerza muy eficaz que se centra principalmente en los cuádriceps, los glúteos y el tronco, al tiempo que trabaja la parte superior del cuerpo. Las personas suelen realizar sentadillas frontales para mejorar la fuerza de la parte inferior del cuerpo, aumentar la estabilidad del tronco, potenciar la aptitud funcional y mejorar el rendimiento deportivo en general. ",
   "predefined_template_Push_Routine": "Rutina de empuje",
   "predefined_template_pull_day": "Día de Tirón",
   "predefined_template_leg_day_basic_name": "Pierna Completa",

@@ -158,7 +158,6 @@ class DatabaseHelper {
     ''');
       print("Migración a v8 completada.");
     }
-    // --- NUEVA MIGRACIÓN PARA LA VERSIÓN 9 ---
     if (oldVersion < 9) {
       print("Migración a v9: Creando la tabla ai_chat_history...");
       await db.execute('''
@@ -656,5 +655,7 @@ class DatabaseHelper {
       );
     });
   }
+
+
 }
 

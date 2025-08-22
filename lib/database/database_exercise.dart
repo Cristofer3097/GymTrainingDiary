@@ -490,9 +490,21 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
     'image': 'assets/exercises/Hammer.gif',
     'description': 'The Hammer Curl is a strength training exercise that primarily targets the biceps and forearms, enhancing upper body strength and improving muscle definition.',
   },
+  {
+    'id': 68,
+    'name': 'Sigle Arm Pulldown',
+    'muscle_group': "Back",
+    'image': 'assets/exercises/armpulldown.gif',
+    'description': 'Sigle Arm Pulldown is a strength-building exercise that targets the latissimus dorsi muscles of the back, improving muscle tone and definition.',
+  },
+  {
+    'id': 69,
+    'name': 'Front Squat',
+    'muscle_group': "Legs",
+    'image': 'assets/exercises/front-squat.gif',
+    'description': 'The Front Squat is a highly effective strength training exercise that primarily targets the quadriceps, glutes, and core, while also engaging the upper body. People would want to do Front Squats to improve lower body strength, enhance core stability, boost functional fitness, and increase overall athletic performance.',
+  },
 
-
-  // Continúa añadiendo IDs únicos a todos tus ejercicios...
 ];
 
 const List<Map<String, dynamic>> predefinedTemplatesData = [

@@ -661,7 +661,10 @@
   "exercise_66_description":"The Shrug exercise is a strength-building workout that primarily targets the trapezius muscles in the upper back and neck, contributing to improved posture and upper body strength. It's a suitable exercise for anyone, from fitness beginners to professional athletes, looking to enhance their shoulder stability and upper body muscular endurance. ",
   "exercise_67_name": "Hammer Curl",
   "exercise_67_description":"The Hammer Curl is a strength training exercise that primarily targets the biceps and forearms, enhancing upper body strength and improving muscle definition.",
-
+  "exercise_68_name": "Sigle Arm Pulldown",
+  "exercise_68_description":"Sigle Arm Pulldown is a strength-building exercise that targets the latissimus dorsi muscles of the back, improving muscle tone and definition.",
+  "exercise_69_name": "Front Squat",
+  "exercise_69_description": "The Front Squat is a highly effective strength training exercise that primarily targets the quadriceps, glutes, and core, while also engaging the upper body. People would want to do Front Squats to improve lower body strength, enhance core stability, boost functional fitness, and increase overall athletic performance.",
 
   "predefined_template_Push_Routine": "Push Routine",
   "predefined_template_pull_day": "Pull Day",
