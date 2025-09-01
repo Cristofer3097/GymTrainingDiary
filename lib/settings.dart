@@ -304,7 +304,6 @@ class _SettingsScreenState extends State<Settings> {
         );
       }
       await tempDb.close(); // Cerrar la base de datos temporal después de modificarla.
-      // --- **FIN DEL BLOQUE DE CORRECCIÓN DE RUTAS** ---
 
       // Ahora que la base de datos temporal está corregida, procedemos a restaurar todo.
       // CERRAR la base de datos principal de la app.
@@ -323,7 +322,7 @@ class _SettingsScreenState extends State<Settings> {
         }
       }
 
-      // Limpiar el directorio temporal.
+      // Limpia el directorio temporal.
       await tempDir.delete(recursive: true);
 
       if (mounted) {
@@ -420,7 +419,7 @@ class _SettingsScreenState extends State<Settings> {
           ),
           const SizedBox(height: 140),
           Center(
-            child: Text(l10n.creatorCredit,
+            child: Text("Version 1.0.1",
               style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[500]),
             ),
           ),
