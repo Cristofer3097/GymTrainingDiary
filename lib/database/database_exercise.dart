@@ -157,44 +157,44 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
   },
   // Piernas
   {
-    'id': 22, // <--- Nuevo ID
+    'id': 22,
     'name': 'Hack Squat',
-    'muscle_group': "Legs",
+    'muscle_group': "Quadriceps",
     'image': 'assets/exercises/Hack_Squat.gif',
     'description': 'The Hack Squat is a lower body exercise that primarily targets the quadriceps, while also engaging the glutes and hamstrings, contributing to improved strength, balance, and muscle definition. Individuals might opt for the Sled Hack Squat because it offers a safer alternative to traditional squats, as it reduces strain on the back while still providing an effective workout for the lower body.',
   },
   {
-    'id': 23, // <--- Nuevo ID
+    'id': 23,
     'name': 'Quadriceps Extensions',
-    'muscle_group': "Legs",
+    'muscle_group': "Quadriceps",
     'image': 'assets/exercises/Extension.gif',
     'description': 'The quadriceps extensions is a strength-building exercise that primarily targets the quadriceps, enhancing muscle tone, power, and endurance in the lower body.',
   },
   {
-    'id': 24, // <--- Nuevo ID
+    'id': 24,
     'name': 'Incline Press',
-    'muscle_group': "Legs",
+    'muscle_group': "Quadriceps",
     'image': 'assets/exercises/Incline_Press.gif',
     'description': 'The Incline Press is a comprehensive lower body exercise that primarily targets the quadriceps, while also engaging the glutes, hamstrings, and calves. This exercise is suitable for both beginners and advanced fitness enthusiasts as it can be easily adjusted to match individual strength levels.',
   },
   {
-    'id': 25, // <--- Nuevo ID
+    'id': 25,
     'name': 'Barbell Squat',
-    'muscle_group': "Legs",
+    'muscle_group': "Quadriceps",
     'image': 'assets/exercises/Barbell_Squat.gif',
     'description': 'The Barbell Squat is a comprehensive lower body exercise that primarily targets the quadriceps, hamstrings, and glutes, while also engaging the core and improving balance. It is suitable for individuals at all fitness levels, from beginners to advanced athletes, due to its modifiable intensity and form. People would want to perform this exercise not only for its ability to build strength and muscle, but also for its benefits in enhancing flexibility, mobility, and overall functional fitness.',
   },
   {
-    'id': 26, // <--- Nuevo ID
+    'id': 26,
     'name': 'Smith Squat',
-    'muscle_group': "Legs",
+    'muscle_group': "Quadriceps",
     'image': 'assets/exercises/Smith_Squat.gif',
     'description': 'The Smith Squat is a strength training exercise that primarily targets the glutes, quadriceps, and hamstrings, while also engaging the core and lower back. ',
   },
   {
-    'id': 27, // <--- Nuevo ID
+    'id': 27,
     'name': 'Adductor in Machine',
-    'muscle_group': "Legs",
+    'muscle_group': "Quadriceps",
     'image': 'assets/exercises/Adductor_in_Machine.gif',
     'description': 'The Adductor in Machine is a targeted strength exercise that focuses on the inner thigh muscles, primarily the adductor group. This exercise is beneficial not only for improving overall leg aesthetics, but also for enhancing performance in movements and sports that require strong, stable hips and thighs.',
   },
@@ -207,7 +207,7 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
     'description': 'The Machine Lateral Raises is a strength training exercise that primarily targets the shoulders, specifically the lateral deltoids, aiding in the development of broader, stronger shoulders.',
   },
   {
-    'id': 29, // <--- Nuevo ID
+    'id': 29,
     'name': 'Dumbbell Lateral Raises',
     'muscle_group': "Shoulders", // También trapecios
     'image': 'assets/exercises/Dumbbell_Lateral_Raises.gif',
@@ -451,21 +451,21 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
   {
     'id': 62,
     'name': 'Lever Seated Calf Raise',
-    'muscle_group': "Legs",
+    'muscle_group': "Calves",
     'image': 'assets/exercises/Lever_Seated_Calf_Raise.gif',
     'description': 'The Lever Seated Calf Raise is a strength-training exercise that primarily targets the calf muscles, enhancing lower leg strength and improving overall balance. ',
   },
   {
     'id': 63,
     'name': 'Lever Standing Calf Raise',
-    'muscle_group': "Legs",
+    'muscle_group': "Calves",
     'image': 'assets/exercises/Lever_Standing_Calf_Raise.gif',
     'description': 'The Lever Standing Calf Raise is a strength training exercise that primarily targets the calf muscles, helping to improve lower leg strength, balance, and muscular definition.',
   },
   {
     'id': 64,
     'name': 'Calf Press',
-    'muscle_group': "Legs",
+    'muscle_group': "Calves",
     'image': 'assets/exercises/Calf_press.gif',
     'description': 'The Calf Press is a strength training exercise that primarily targets the calf muscles, but also engages the hamstrings and glutes.',
   },
@@ -500,7 +500,7 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
   {
     'id': 69,
     'name': 'Front Squat',
-    'muscle_group': "Legs",
+    'muscle_group': "Quadriceps",
     'image': 'assets/exercises/front-squat.gif',
     'description': 'The Front Squat is a highly effective strength training exercise that primarily targets the quadriceps, glutes, and core, while also engaging the upper body. People would want to do Front Squats to improve lower body strength, enhance core stability, boost functional fitness, and increase overall athletic performance.',
   },

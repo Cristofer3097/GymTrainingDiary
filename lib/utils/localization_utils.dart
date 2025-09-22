@@ -75,6 +75,7 @@ String getLocalizedExerciseName(BuildContext context, Map<String, dynamic> exerc
       case 65: return l10n.exercise_65_name;
       case 66: return l10n.exercise_66_name;
       case 67: return l10n.exercise_67_name;
+      case 68: return l10n.exercise_68_name;
       case 69: return l10n.exercise_69_name;
 
 
@@ -195,13 +196,14 @@ String getLocalizedCategoryName(BuildContext context, String categoryKey) {
   switch (categoryKey) {
     case 'Chest': return l10n.category_chest;
     case 'Back': return l10n.category_back;
-    case 'Legs': return l10n.category_legs;
+    case 'Quadriceps': return l10n.category_legs;
     case 'Biceps': return l10n.category_Biceps;
     case 'Triceps': return l10n.category_Triceps;
     case 'Shoulders': return l10n.category_shoulders;
     case 'Trapeze': return l10n.category_trapeze;
     case 'Glutes': return l10n.category_glutes;
     case 'Hamstrings': return l10n.category_Hamstrings;
+    case 'Calves': return l10n.category_calves;
     case 'Abs': return l10n.category_abs;
     case 'Other': return l10n.category_other;
     default:

@@ -25,7 +25,7 @@ class DatabaseHelper {
     final path = join(documentsDirectory.path, filePath);
     return await openDatabase(
       path,
-      version: 9,
+      version: 10,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -169,6 +169,13 @@ class DatabaseHelper {
       )
     ''');
       print("Migración a v9 completada.");
+    }
+    if (oldVersion < 10) {
+      print("Migración a v10: Sincronizando datos de ejercicios (Calves, etc)...");
+      // Esta función leerá tu lista actualizada en database_exercise.dart
+      // y añadirá los nuevos ejercicios o modificará los existentes.
+      await _synchronizePredefinedData(db);
+      print("Migración a v10 completada.");
     }
   }
 

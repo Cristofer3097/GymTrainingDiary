@@ -242,7 +242,17 @@ class _TrainingScreenState extends State<TrainingScreen> {
     });
   }
 
-
+  // Esta función se encarga de actualizar el orden de la lista
+  void _onReorder(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) {
+        newIndex -= 1;
+      }
+      final Map<String, dynamic> item = selectedExercises.removeAt(oldIndex);
+      selectedExercises.insert(newIndex, item);
+      _didDataChange = true;
+    });
+  }
   void _onExerciseUncheckedInOverlay(Map<String, dynamic> exercise) {
     setState(() {
       selectedExercises.removeWhere((ex) => ex['name'] == exercise['name']);
@@ -747,13 +757,13 @@ class _TrainingScreenState extends State<TrainingScreen> {
                             TextStyle(fontSize: 16, color: Colors.grey))))
               else
                 Expanded(
-                  child: ListView.builder(
+                  child: ReorderableListView.builder(
                     itemCount: selectedExercises.length,
+                    onReorder: _onReorder,
                     itemBuilder: (context, index) {
                       final exercise = selectedExercises[index];
+                      final itemKey = ValueKey(exercise['name']! + index.toString());
                       final exerciseName = getLocalizedExerciseName(context, exercise);
-
-
                       String seriesText = exercise['series']?.toString() ?? "-";
                       String repsText = "-";
                       if (exercise['reps'] is List && (exercise['reps'] as List).isNotEmpty) {
@@ -792,141 +802,149 @@ class _TrainingScreenState extends State<TrainingScreen> {
                         imageWidget = Icon(Icons.fitness_center, color: Colors.grey[600], size: 40);
                       }
 
-                      return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 6.0),
-                      child: InkWell( // Envuelve con InkWell para onLongPress y efecto visual
-                      onLongPress: () async {
-                      // Obtén l10n aquí si no está disponible en el scope superior del itemBuilder
-                      // final l10n = AppLocalizations.of(context)!; // (Si es necesario)
-
-                      // Usa el nombre canónico para el mensaje del diálogo,
-                      // o el nombre localizado si tu clave ARB lo maneja así.
-                      // Asumiendo que 'exerciseName' es el nombre localizado que quieres mostrar al usuario:
-
-                        final bool? confirmed = await showDialog<bool>(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: Text(l10n.removeExerciseDialogTitle), // Usa tu clave de localización
-                              content: Text(
-                            l10n.training_quit_message(exerciseName) // Usa tu clave con placeholder
-                      ),
-                      actions: [
-                      TextButton(
-                          onPressed: () => Navigator.pop(ctx, false),
-                          child: Text("No") // Usa tu clave de localización
-                        ),
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                            onPressed: () => Navigator.pop(ctx, true),
-                            child: Text(l10n.training_quit_confirm) // Usa tu clave de localización
-                        ),
-                      ],
-                          ),
-                        );
-
-                        if (confirmed == true && mounted) {
-                          _removeExerciseFromTraining(index);
-                        }
-                        },
-                        child: Dismissible(
-                          key: UniqueKey(),
-                          direction: DismissDirection.endToStart,
-                          background: Container(
-                            decoration: BoxDecoration(
-                                color: Colors.red.shade700,
-                                borderRadius: BorderRadius.circular(10.0)
+                      return Row(
+                        key: itemKey,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ReorderableDragStartListener(
+                            index: index,
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 4.0),
+                              child: Icon(Icons.drag_handle, color: Colors.grey),
                             ),
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Icon(Icons.delete_sweep, color: Colors.white),
                           ),
 
-                          confirmDismiss: (direction) async {
-                            return await showDialog<bool>(
-                              context: context,
-                              builder: (ctx) => AlertDialog(
-                                title: Text(l10n.removeExerciseDialogTitle),
-                                content: Text(
-                                    l10n.training_quit_message(exerciseName)),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(ctx, false),
-                                      child: Text("No")),
-                                  ElevatedButton( // Destacar acción de quitar
-                                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                                      onPressed: () =>
-                                          Navigator.pop(ctx, true),
-                                      child: Text(l10n.training_quit_confirm)),
-                                ],
-                              ),
-                            ) ?? false;
-                          },
-                          onDismissed: (direction) {
-                            if (mounted) {
-                              _removeExerciseFromTraining(index);
-                            }
-                          },
-                          child: ListTile(
-                            contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                            title: Row(
-                              children: [
-                                Text(
-                                  '${index + 1}. ', // Número del ejercicio
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Theme.of(context).primaryColor), // Color amarillo para el número
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    exerciseName,
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-                                    overflow: TextOverflow.ellipsis, // Para manejar nombres largos
+                          Expanded(
+                            child: Card(
+                              margin: const EdgeInsets.symmetric(vertical: 6.0),
+                              child: InkWell(
+                                onLongPress: () async {
+                                  final bool? confirmed = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: Text(l10n.removeExerciseDialogTitle),
+                                      content: Text(l10n.training_quit_message(exerciseName)),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () => Navigator.pop(ctx, false),
+                                            child: Text("No")),
+                                        ElevatedButton(
+                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                            onPressed: () => Navigator.pop(ctx, true),
+                                            child: Text(l10n.training_quit_confirm)),
+                                      ],
+                                    ),
+                                  );
+
+                                  if (confirmed == true && mounted) {
+                                    _removeExerciseFromTraining(index);
+                                  }
+                                },
+                                child: Dismissible(
+                                  key: Key('dismiss_${itemKey.toString()}'),
+                                  direction: DismissDirection.endToStart,
+                                  background: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.red.shade700,
+                                        borderRadius: BorderRadius.circular(10.0)),
+                                    alignment: Alignment.centerRight,
+                                    padding: EdgeInsets.symmetric(horizontal: 20),
+                                    child: Icon(Icons.delete_sweep, color: Colors.white),
+                                  ),
+                                  confirmDismiss: (direction) async {
+                                    return await showDialog<bool>(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: Text(l10n.removeExerciseDialogTitle),
+                                        content: Text(l10n.training_quit_message(exerciseName)),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () => Navigator.pop(ctx, false),
+                                              child: Text("No")),
+                                          ElevatedButton(
+                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                              onPressed: () => Navigator.pop(ctx, true),
+                                              child: Text(l10n.training_quit_confirm)),
+                                        ],
+                                      ),
+                                    ) ?? false;
+                                  },
+                                  onDismissed: (direction) {
+                                    if (mounted) {
+                                      _removeExerciseFromTraining(index);
+                                    }
+                                  },
+                                  child: ListTile(
+                                    contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                                    title: Row(
+                                      children: [
+                                        // El número vuelve a estar al inicio del título
+                                        Text(
+                                          '${index + 1}. ',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 17,
+                                              color: Theme.of(context).primaryColor),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            exerciseName,
+                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              width: 60,
+                                              height: 60,
+                                              clipBehavior: Clip.antiAlias,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(8.0),
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .surfaceVariant
+                                                    .withOpacity(0.5),
+                                              ),
+                                              child: imageWidget,
+                                            ),
+                                            SizedBox(width: 10),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text('${l10n.serie}: $seriesText',
+                                                      style: TextStyle(fontSize: 14, height: 1.4)),
+                                                  Text('${l10n.weight}: $weightText',
+                                                      style: TextStyle(fontSize: 14, height: 1.4)),
+                                                  Text('Reps: $repsText',
+                                                      style: TextStyle(fontSize: 14, height: 1.4)),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    trailing: IconButton(
+                                      icon: Icon(Icons.edit_note,
+                                          color: Theme.of(context).primaryColor, size: 28),
+                                      onPressed: () => _openExerciseDataDialog(exercise, index),
+                                    ),
+                                    onTap: () => _openExerciseDataDialog(exercise, index),
+                                    isThreeLine: true,
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 60, // Ancho de la imagen
-                                      height: 60, // Alto de la imagen
-                                      clipBehavior: Clip.antiAlias,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8.0),
-                                        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
-                                      ),
-                                      child: imageWidget, // Aquí se muestra la imagen
-                                      ),
-                                    SizedBox(width: 10), // Espacio entre imagen y texto
-                            Expanded(
-                      child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                                Text('${l10n.serie}: $seriesText', style: TextStyle(fontSize: 14, height: 1.4)),
-                                Text('${l10n.weight}: $weightText', style: TextStyle(fontSize: 14, height: 1.4)),
-                                Text('Reps: $repsText', style: TextStyle(fontSize: 14, height: 1.4)),
-                      ],
-                      ),
-                      ),
-                      ],
-                      ),
-                      ],
-                      ),
-                            trailing: IconButton(
-                              icon: Icon(Icons.edit_note,
-                                  color: Theme.of(context).primaryColor, size: 28),
-                              onPressed: () =>
-                                  _openExerciseDataDialog(exercise, index),
-                            ),
-                            onTap: () =>
-                                _openExerciseDataDialog(exercise, index),
-                            isThreeLine: true, // Ajustar según sea necesario
                           ),
-                        ),
-                      ),
+                        ],
                       );
                     },
                   ),
@@ -981,7 +999,7 @@ class _ExerciseOverlayState extends State<ExerciseOverlay> {
   static const double iconButtonWidth = 48.0;
   final List<String> _canonicalMuscleGroupKeys = [
     '', // Representa "Todas las Categorías"
-    'Chest', 'Legs', 'Back', 'Biceps','Triceps', 'Shoulders','Trapeze', 'Glutes','Hamstrings', 'Abs', 'Other'
+    'Chest', 'Quadriceps', 'Back', 'Biceps','Triceps', 'Shoulders','Trapeze', 'Glutes','Hamstrings', 'Calves', 'Abs', 'Other'
 
   ];
 
@@ -1329,7 +1347,7 @@ class _NewExerciseDialogState extends State<NewExerciseDialog> {
   String? _initialImagePathPreview;
 
   final List<String> _canonicalMuscleGroupKeysForDialog = [
-    'Chest', 'Legs', 'Back', 'Biceps', 'Triceps', 'Shoulders','Trapeze', 'Glutes', 'Hamstrings', 'Abs', 'Other'
+    'Chest', 'Quadriceps', 'Back', 'Biceps', 'Triceps', 'Shoulders','Trapeze', 'Glutes', 'Hamstrings', 'Calves', 'Abs', 'Other'
   ];
 
   bool get isEditMode => widget.exerciseToEdit != null;
