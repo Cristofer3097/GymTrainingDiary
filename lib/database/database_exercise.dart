@@ -1,77 +1,77 @@
 const List<Map<String, dynamic>> predefinedExerciseList = [
   // Pecho
   {
-    'id': 0, // <--- Nuevo ID
-    'name': 'Bench Press',
-    'muscle_group': 'Chest',
+    'id': 0, // ID
+    'name': 'Bench Press', //Nombre del ejercicio
+    'muscle_group': 'Chest', //Categoria
     'image': 'assets/exercises/bench_press.gif',
     'description': 'The Bench Press is a classic strength training exercise that primarily targets the chest, shoulders, and triceps, contributing to upper body muscle development. It is suitable for anyone, from beginners to professional athletes, looking to improve their upper body strength and muscular endurance. Individuals may want to incorporate bench press into their routine for its effectiveness in enhancing physical performance, promoting bone health, and improving body composition.', // <-- EN INGLÉS
   },
   {
-    'id': 1, // <--- Nuevo ID
+    'id': 1,
     'name': 'Dumbbell bench press',
     'muscle_group': 'Chest',
     'image': 'assets/exercises/Dumbbell_bench_press.gif',
     'description': 'The Dumbbell Bench Press is a versatile strength-training exercise that primarily targets the chest, while also engaging the shoulders and triceps. It is suitable for both beginners and advanced fitness enthusiasts as it can be easily modified to match individual strength levels and goals. People might opt for this exercise as it promotes muscle growth, improves upper body strength, and offers better range of motion compared to a barbell bench press.',
   },
   {
-    'id': 2, // <--- Nuevo ID
+    'id': 2,
     'name': 'Smith Bench Press',
     'muscle_group': 'Chest',
     'image': 'assets/exercises/Smith_bench_press.png',
     'description': 'The Smith Bench Press is a strength-training exercise that primarily targets the chest muscles, while also engaging the shoulders and triceps. The Smith machine provides stability, allowing for controlled movements and focus on form. One would want to perform this exercise to build upper body strength, enhance muscle definition, and improve overall athletic performance.',
   },
   {
-    'id': 3, // <--- Nuevo ID
+    'id': 3,
     'name': 'Dumbbell Fly',
     'muscle_group': 'Chest',
     'image': 'assets/exercises/Dumbbell_Flyes.gif',
     'description': 'The Dumbbell Fly is a strength training exercise targeting the chest muscles, specifically the pectoralis major, and secondary muscles like the shoulders and biceps. This exercise is beneficial for those looking to enhance their upper body strength, improve muscle definition, and promote better posture.',
   },
   {
-    'id': 4, // <--- Nuevo ID
+    'id': 4,
     'name': 'Lever Seated Fly',
     'muscle_group': 'Chest',
     'image': 'assets/exercises/Lever_Seated_Fly.gif',
     'description': 'The Lever Seated Fly is a strength training exercise primarily targeting the chest muscles, while also engaging the shoulders and arms. The exercise is beneficial for enhancing muscle definition, improving posture, and boosting upper body strength, making it an ideal choice for those looking to increase their functional fitness or sculpt their physique.',
   },
   {
-    'id': 5, // <--- Nuevo ID
+    'id': 5,
     'name': 'Incline Bench Press',
     'muscle_group': 'Chest',
     'image': 'assets/exercises/Press_Incline_Bench_Press.gif',
     'description': 'The Incline Bench Press is a strength-training exercise that primarily targets the upper portion of the chest muscles, while also engaging the shoulders and triceps. Suitable for anyone looking to enhance upper body strength and improve muscle definition, particularly in the chest area. ',
   },
   {
-    'id': 6, // <--- Nuevo ID
+    'id': 6,
     'name': 'Dumbbel Incline Bench Press',
     'muscle_group': 'Chest',
     'image': 'assets/exercises/Dumbbel_Incline_Bench_Press.png',
     'description': 'The Dumbbell Incline Bench Press is a highly effective exercise primarily targeting the upper chest muscles, but also working the shoulders and triceps. Individuals may want to incorporate this exercise into their routine as it allows for a greater range of motion compared to the barbell version, promoting better muscle activation and growth.',
   },
   {
-    'id': 7, // <--- Nuevo ID
+    'id': 7,
     'name': 'Lever Chest Press',
     'muscle_group': 'Chest',
     'image': 'assets/exercises/Lever_Chest_Press.gif',
     'description': 'The Lever Chest Press is a strength-building exercise that primarily targets the pectoral muscles, but also works the triceps and anterior deltoids. It is an excellent workout for both beginners and advanced fitness enthusiasts due to its adjustable resistance and controlled movement. People may choose this exercise for its ability to enhance upper body strength, improve muscle tone, and assist in the development of a more defined chest.',
   },
   {
-    'id': 8, // <--- Nuevo ID
+    'id': 8,
     'name': 'Chest Dip',
     'muscle_group': 'Chest',
     'image': 'assets/exercises/chest_dips.gif',
     'description': 'The Chest Dip is a powerful exercise that primarily targets the pectoralis muscles, triceps, and the front shoulders, helping to build strength and definition in these areas. It is suitable for individuals at an intermediate or advanced fitness level who are aiming to enhance their upper body strength and muscular endurance.',
   },
   {
-    'id': 9, // <--- Nuevo ID
+    'id': 9,
     'name': 'Smith Incline Bench Press',
     'muscle_group': "Chest",
     'image': 'assets/exercises/Smith_Incline_Bench_Press.png',
     'description': 'The Smith Incline Bench Press is a strength-building exercise that primarily targets your upper chest, shoulders, and triceps, while also engaging other supporting muscles. Suitable for both beginners and advanced athletes due to the controlled movement of the Smith machine, which can help prevent injury and ensure correct form.',
   },
   {
-    'id': 10, // <--- Nuevo ID
+    'id': 10,
     'name': 'Cable Fly',
     'muscle_group': "Chest",
     'image': 'assets/exercises/cable_fly.gif',
@@ -79,63 +79,63 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
   },
   // Espalda
   {
-    'id': 11, // <--- Nuevo ID
+    'id': 11,
     'name': 'Pulldown',
     'muscle_group': 'Back',
     'image': 'assets/exercises/Pulldown.gif',
     'description': 'The Cable Pulldown is a popular strength training exercise that primarily targets the muscles in your back, specifically the latissimus dorsi, but also works your shoulders and arms. This exercise is ideal for both beginners and advanced fitness enthusiasts, as the weight can be easily adjusted to match individual strength levels. Incorporating Cable Pulldowns into your workout routine can help improve upper body strength, promote better posture, and enhance muscle definition.',
   },
   {
-    'id': 12, // <--- Nuevo ID
+    'id': 12,
     'name': 'Pulldown with V-bar',
     'muscle_group': "Back",
     'image': 'assets/exercises/Pulldown_with_V-bar.gif',
     'description': 'Pulldown with V-bar is a highly effective exercise that targets and strengthens the muscles in your back, shoulders, and arms, particularly the latissimus dorsi.',
   },
   {
-    'id': 13, // <--- Nuevo ID
+    'id': 13,
     'name': 'Pull-up',
     'muscle_group': "Back",
     'image': 'assets/exercises/Pull-up.gif',
     'description': 'The Pull-up exercise is a highly beneficial upper body workout that targets multiple muscle groups, including the back, arms, shoulders, and chest, improving strength and endurance. It is an ideal exercise for anyone, from beginners to fitness enthusiasts, who are interested in building upper body strength and enhancing muscle definition. ',
   },
   {
-    'id': 14, // <--- Nuevo ID
+    'id': 14,
     'name': 'Supination Pulldown on High Pulley',
     'muscle_group': "Back",
     'image': 'assets/exercises/Supination-Pulldown-on-High-Pulley.gif',
     'description': 'Supination Pulldown on High Pulley is a strength-building exercise targeting your back muscles, particularly the lats, rhomboids, and traps. It is suitable for individuals at all fitness levels who want to improve their upper body strength and posture. ',
   },
   {
-    'id': 15, // <--- Nuevo ID
+    'id': 15,
     'name': 'Horizontal Row',
     'muscle_group': "Back",
     'image': 'assets/exercises/Horizontal_Rowing.gif',
     'description': 'Horizontal Row is a strength-building exercise that targets the muscles in your back, shoulders, and arms, making it ideal for those looking to improve upper body strength and posture. ',
   },
   {
-    'id': 16, // <--- Nuevo ID
+    'id': 16,
     'name': 'Open Horizontal Row',
     'muscle_group': "Back",
     'image': 'assets/exercises/Open_Horizontal_Rowing.gif',
     'description': 'Open Horizontal Row is a strength-building exercise that targets the muscles in your back, shoulders, and arms, contributing to improved posture and overall upper body strength.',
   },
   {
-    'id': 17, // <--- Nuevo ID
+    'id': 17,
     'name': 'Horizontal Machine Row',
     'muscle_group': "Back",
     'image': 'assets/exercises/Horizontal_Machine_Row.gif',
     'description': 'Horizontal Machine Row is a strength training exercise that primarily targets the muscles in the back, improving muscular endurance and promoting better posture. ',
   },
   {
-    'id': 18, // <--- Nuevo ID
+    'id': 18,
     'name': 'T-Bar Row',
     'muscle_group': "Back",
     'image': 'assets/exercises/T-Bar_Row.gif',
     'description': 'T-Bar Row is a strength training exercise that primarily targets the muscles in your back, shoulders, and arms, offering a comprehensive upper body workout. ',
   },
   {
-    'id': 19, // <--- Nuevo ID
+    'id': 19,
     'name': 'Barbell Row',
     'muscle_group': "Back",
     'image': 'assets/exercises/Rear_Delt_Row.gif',
@@ -149,7 +149,7 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
     'description': 'Reverse Barbell Row is a strength-building exercise that primarily targets the muscles in your back, biceps, and forearms.',
   },
   {
-    'id': 21, // <--- Nuevo ID
+    'id': 21,
     'name': 'One Arm Row',
     'muscle_group': "Back",
     'image': 'assets/exercises/One_Arm_Row.gif',
@@ -209,54 +209,54 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
   {
     'id': 29,
     'name': 'Dumbbell Lateral Raises',
-    'muscle_group': "Shoulders", // También trapecios
+    'muscle_group': "Shoulders",
     'image': 'assets/exercises/Dumbbell_Lateral_Raises.gif',
     'description': 'The Lateral Raise is a strength training exercise that primarily targets the deltoids, helping to build shoulder width and definition. It is suitable for individuals at any fitness level, from beginners to advanced athletes, looking to improve upper body strength and posture. People may want to incorporate Lateral Raises into their routine to enhance shoulder stability, promote balanced muscle development, and improve daily functional movements.',
   },
   {
-    'id': 30, // <--- Nuevo ID
+    'id': 30,
     'name': 'Lateral Raises on Cables',
     'muscle_group': "Shoulders",
     'image': 'assets/exercises/Lateral_Raises_on_cables.gif',
     'description': 'The Lateral Raises on Cables is a strength-building exercise that primarily targets the deltoids, enhancing shoulder definition and improving overall upper body strength.',
   },
   {
-    'id': 31, // <--- Nuevo ID
+    'id': 31,
     'name': 'Dumbbell Shoulder Press',
     'muscle_group': "Shoulders",
     'image': 'assets/exercises/Dumbbell_Military_Press.gif',
     'description': 'The Dumbbell Shoulder Press is a highly effective upper body exercise that targets the deltoids, triceps, and upper pectoral muscles, promoting improved strength and muscle tone.',
   },
   {
-    'id': 32, // <--- Nuevo ID
+    'id': 32,
     'name': 'Shoulder Press on Machine',
     'muscle_group': "Shoulders",
     'image': 'assets/exercises/Military_Press_on_Machine.gif',
     'description': 'The Shoulder Press on Machine is a strength-building exercise targeting the deltoids, triceps, and upper body muscles, making it highly beneficial for those aiming to enhance their upper body strength.',
   },
   {
-    'id': 33, // <--- Nuevo ID
+    'id': 33,
     'name': 'Shoulder Press Smith',
     'muscle_group': "Shoulders",
     'image': 'assets/exercises/Military_Press_Smith.png',
     'description': 'The Shoulder Press Smith is a strength-building exercise that primarily targets the deltoids, triceps, and upper body muscles, offering a comprehensive workout for your upper body. It is suitable for both beginners and advanced fitness enthusiasts as it allows for controlled movements and adjustable weights. ',
   },
   {
-    'id': 34, // <--- Nuevo ID
+    'id': 34,
     'name': 'Dumbbell Front Raise',
     'muscle_group': "Shoulders",
     'image': 'assets/exercises/Dumbbell_Front_Raises.gif',
     'description': 'The Dumbbell Front Raise is a strength-building exercise that primarily targets the shoulders, specifically the anterior deltoids, and also works the upper chest muscles. ',
   },
   {
-    'id': 35, // <--- Nuevo ID
+    'id': 35,
     'name': 'Lever Reverse Fly',
     'muscle_group': "Shoulders",
     'image': 'assets/exercises/Machine_Rear_Flyes.gif',
     'description': 'The Lever Reverse Fly is a strength training exercise that primarily targets and enhances the muscles in your upper back, shoulders, and arms. It is ideal for individuals at an intermediate fitness level who are looking to improve their upper body strength and posture.',
   },
   {
-    'id': 36, // <--- Nuevo ID
+    'id': 36,
     'name': 'Rear Fly',
     'muscle_group': "Shoulders",
     'image': 'assets/exercises/Rear_Fly.gif',
@@ -265,7 +265,7 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
   // Biceps
 
   {
-    'id': 37, // <--- Nuevo ID
+    'id': 37,
     'name': 'Barbell Curl',
     'muscle_group': "Biceps",
     'image': 'assets/exercises/Barbell_Curl.gif',
@@ -287,35 +287,35 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
   },
 
   {
-    'id': 40, // <--- Nuevo ID
+    'id': 40,
     'name': 'Overhead Curl',
     'muscle_group': "Biceps",
     'image': 'assets/exercises/Overhead_Curl.gif',
     'description': 'The Overhead Curl is a strength training exercise that primarily targets the biceps and shoulders, helping to enhance upper body strength and improve muscle definition. This exercise is ideal for both beginners and advanced fitness enthusiasts as it can be easily adjusted to match individual fitness levels. Incorporating Overhead Curls into your workout routine can aid in improving arm strength and stability, making it a beneficial exercise for those who are looking to improve their performance in sports or daily activities that require upper body strength.',
   },
   {
-    'id': 41, // <--- Nuevo ID
+    'id': 41,
     'name': 'Lever Preacher Curl',
     'muscle_group': "Biceps",
     'image': 'assets/exercises/Lever_Preacher_Curl.gif',
     'description': 'The Lever Preacher Curl is a strength-training exercise that focuses on isolating the biceps, providing a more targeted workout for muscle growth and toning. It is ideal for both beginners and advanced fitness enthusiasts who are looking to improve their upper body strength and definition. People would want to incorporate this exercise into their routine as it promotes better arm stability, enhances muscle symmetry, and contributes to overall upper body aesthetics.',
   },
   {
-    'id': 42, // <--- Nuevo ID
+    'id': 42,
     'name': 'Barbell Preacher Curl',
     'muscle_group': "Biceps",
     'image': 'assets/exercises/Barbell_Preacher_Curl.gif',
     'description': 'The Barbell Preacher Curl is a highly effective exercise for targeting and isolating the biceps, particularly the brachialis muscle, leading to enhanced arm strength and size. ',
   },
   {
-    'id': 43, // <--- Nuevo ID
+    'id': 43,
     'name': 'Barbell Spider Curl',
     'muscle_group': "Biceps",
     'image': 'assets/exercises/Barbell_Spider_Curl.gif',
     'description': 'The Barbell Spider Curl is a targeted exercise designed to isolate and enhance the biceps by reducing help from other muscle groups. This exercise is ideal for individuals looking to improve their upper body strength, particularly those wanting to define and sculpt their arm muscles.',
   },
   {
-    'id': 44, // <--- Nuevo ID
+    'id': 44,
     'name': 'Isolated Biceps Curl',
     'muscle_group': "Biceps",
     'image': 'assets/exercises/Isolated_Biceps_Curl.gif',
