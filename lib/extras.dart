@@ -90,7 +90,6 @@ class TipsExtrasScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // --- CAMBIO: Se quita el InkWell, ahora es solo un Row para mostrar el título y el ícono ---
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -105,10 +104,10 @@ class TipsExtrasScreen extends StatelessWidget {
                           icon: Icon(Icons.info_outline_rounded, color: theme.primaryColor, size: 20),
                           onPressed: () => _showRmInfoDialog(context),
                           padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(), // Ayuda a reducir el área de toque excesiva
+                          constraints: const BoxConstraints(),
                         )                      ],
                     ),
-                    Text( // La descripción no cambia
+                    Text(
                       l10n.tips_rm_text,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: Colors.white.withOpacity(0.85),
@@ -195,6 +194,15 @@ class TipsExtrasScreen extends StatelessWidget {
             _buildTip(context, l10n.tips_series, l10n.tips_series_text),
             _buildTip(context, l10n.tips_nutrition, l10n.tips_nutrition_text),
 
+            _buildSectionTitle(context, l10n.tips_notice_title, theme.primaryColor),
+
+            const SizedBox(height: 6),
+            Text(l10n.tips_notice_text,
+              style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
+            ),
+            const SizedBox(height: 12),
+
+
             const SizedBox(height: 24),
             _buildSectionTitle(context, l10n.tips_repositories, theme.primaryColor),
             Text(l10n.tips_repositories_text,
@@ -227,6 +235,8 @@ class TipsExtrasScreen extends StatelessWidget {
       ),
     );
   }
+
+
 
   Widget _buildSectionTitle(BuildContext context, String title, Color color) {
     return Padding(

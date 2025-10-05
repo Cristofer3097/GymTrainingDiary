@@ -7,6 +7,7 @@ import 'database_exercise.dart';
 import '../ai_screen.dart';
 
 
+
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
@@ -25,7 +26,7 @@ class DatabaseHelper {
     final path = join(documentsDirectory.path, filePath);
     return await openDatabase(
       path,
-      version: 10,
+      version: 11,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -47,6 +48,7 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
         template_key TEXT
+
       );
     ''');
 
@@ -78,7 +80,8 @@ class DatabaseHelper {
     CREATE TABLE IF NOT EXISTS training_sessions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       session_title TEXT NOT NULL,
-      session_dateTime TEXT NOT NULL 
+      session_dateTime TEXT NOT NULL,
+      duration INTEGER
     );
   ''');
 
@@ -176,6 +179,11 @@ class DatabaseHelper {
       // y añadirá los nuevos ejercicios o modificará los existentes.
       await _synchronizePredefinedData(db);
       print("Migración a v10 completada.");
+    }
+    if (oldVersion < 11) {
+      print("Migración a v11: Añadiendo columna 'duration' a training_sessions...");
+      await db.execute('ALTER TABLE training_sessions ADD COLUMN duration INTEGER');
+      print("Migración a v11 completada.");
     }
   }
 
@@ -302,11 +310,12 @@ class DatabaseHelper {
   }
 
 
-  Future<int> insertTrainingSession(String title, String dateTime) async {
+  Future<int> insertTrainingSession(String title, String dateTime, int? durationInSeconds) async {
     final db = await database;
     return await db.insert('training_sessions', {
       'session_title': title,
       'session_dateTime': dateTime,
+      'duration': durationInSeconds,
     });
   }
 
@@ -500,11 +509,11 @@ class DatabaseHelper {
   }
 
   // Actualizar el título y fecha de una sesión
-  Future<void> updateTrainingSession(int sessionId, String newTitle, String newDateTime) async {
+  Future<void> updateTrainingSession(int sessionId, String newTitle, String newDateTime, int? duration) async {
     final db = await database;
     await db.update(
       'training_sessions',
-      {'session_title': newTitle, 'session_dateTime': newDateTime},
+      {'session_title': newTitle, 'session_dateTime': newDateTime, 'duration': duration},
       where: 'id = ?',
       whereArgs: [sessionId],
     );

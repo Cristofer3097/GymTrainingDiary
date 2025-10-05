@@ -165,7 +165,7 @@
   "training_save_error": "Error al guardar entrenamiento",
   "training_no_name": "Ejercicio sin nombre",
   "training_delete_exercise":  "¿Borrar Ejercicio?",
-  "training_delete_exercise_message":"'{exerciseNameForDialog}' se eliminará permanentemente de la lista de ejercicios disponibles. Esta acción no se puede deshacer.",
+  "training_delete_exercise_message":"'{exerciseNameForDialog}' se eliminará permanentemente de la lista de ejercicios disponibles. \nEsta acción no se puede deshacer.",
   "@training_delete_exercise_message": {
     "description": "Mensaje de confirmación para borrar un ejercicio.",
     "placeholders": {
@@ -269,7 +269,7 @@
   "template_donthave": "No hay plantillas para borrar.",
   "template_id": "Error: Plantilla sin ID",
   "template_question": "¿Borrar plantilla?",
-  "template_question1": "¿Quieres eliminar la plantilla '{displayTemplateName}'? Esta acción no se puede deshacer.",
+  "template_question1": "¿Quieres eliminar la plantilla '{displayTemplateName}'? \nEsta acción no se puede deshacer.",
   "@template_question1": {
     "description": "Mensaje de confirmación para borrar una plantilla.",
     "placeholders": {
@@ -279,7 +279,7 @@
       }
     }
   },
-  "template_question2": "¿Quieres eliminar la plantilla '{templateName}'? Esta acción no se puede deshacer.",
+  "template_question2": "¿Quieres eliminar la plantilla '{templateName}'? \nEsta acción no se puede deshacer.",
   "@template_question2": {
     "description": "Mensaje de confirmación para borrar una plantilla.",
     "placeholders": {
@@ -325,8 +325,7 @@
     }
   },
 
-
-  "tips_title": "\uD83D\uDCA1 Consejos Rápidos",
+  "tips_title": "💡 Consejos Rápidos",
   "tips_rm": "RM",
   "tips_rm_text": "Para conocer tu máximo de una repetición, utiliza la siguiente calculadora:",
   "tips_rm_is_title": "¿Qué es RM?",
@@ -356,7 +355,9 @@
   "tips_series": "Descanso entre series",
   "tips_series_text": "3 minutos entre series son ideales para entrenamientos que buscan aumentar la fuerza máxima y la potencia. Permiten una recuperación más completa del sistema neuromuscular y energético, lo que facilita una mayor intensidad y volumen en las series subsecuentes.",
   "tips_nutrition":"Nutrición",
-  "tips_nutrition_text": "Una alimentación balanceada es fundamental.\n -Es importante llegar a tus calorias de mantenimiento o con un poco de superávit calórico (100 - 200) es suficiente para ganancias mosculares. (Hay muchas paginas web para calcular tus calorias necesarias)  \n -Asegúrate de consumir suficientes proteínas (1.8 gr de proteina multiplicado por tu peso) para la reparación muscular. \n -Los Carbohidratos son tambien fundamentales, antes del entrenamiento es crucial para optimizar el rendimiento, especialmente en ejercicios de larga duración o alta intensidad. \n -Unos Carbohidratos de absorción lenta, como pan integral o frutas, puede ayudar a mantener los niveles de energía estables a lo largo del entrenamiento.",
+  "tips_nutrition_text": "Una alimentación balanceada es fundamental.\n -Asegúrate de consumir suficientes proteínas (2 gr de proteina multiplicado por tu peso puede ser un aproximacion) para la reparación muscular. \n -Los Carbohidratos son tambien fundamentales, antes del entrenamiento es crucial para optimizar el rendimiento, especialmente en ejercicios de larga duración o alta intensidad. \n -Unos Carbohidratos de absorción lenta, como pan integral o frutas, puede ayudar a mantener los niveles de energía estables a lo largo del entrenamiento.",
+  "tips_notice_title": "¡Aviso!",
+  "tips_notice_text": "Aunque los consejos y la estructura de esta aplicación están enfocados principalmente en la hipertrofia muscular, sus principios de sobrecarga progresiva y registro detallado son perfectamente aplicables a otras disciplinas de fuerza como el powerlifting, la halterofilia y el fitness en general.",
   "tips_repositories": "\uD83D\uDD17 Repositorio del Proyecto",
   "tips_repositories_text": "El código fuente de esta aplicación está disponible en GitHub. Este proyecto es de código abierto, lo que significa que puedes explorar cómo está construido, proponer mejoras, o incluso utilizar partes del código para tus propios proyectos. \n \nTu contribución o feedback es siempre bienvenido.",
   "tips_repositories_link": "Visitar Repositorio",
@@ -376,7 +377,7 @@
   "calendarFormatWeek": "Semana",
   "calendar_title": "Calendario de Entrenamientos",
   "calendar_confirm": "Confirmar Borrado de Sesión",
-  "confirmDeleteSessionDialogContent": "¿Seguro que quieres borrar la sesión '{sessionTitle}' y todos sus ejercicios? Esta acción no se puede deshacer.",
+  "confirmDeleteSessionDialogContent": "¿Seguro que quieres borrar la sesión '{sessionTitle}' y todos sus ejercicios? \nEsta acción no se puede deshacer.",
   "@confirmDeleteSessionDialogContent": {
     "placeholders": {
       "sessionTitle": {
@@ -444,7 +445,7 @@
   "settings_import": "Importar datos (Restaurar)",
   "settings_import_subtitle": "Restaurar datos desde un archivo",
   "settings_import_warning_title": "¡Atención!",
-  "settings_import_warning_content": "Importar un archivo reemplazará TODOS tus datos actuales. Esta acción no se puede deshacer. ¿Deseas continuar?",
+  "settings_import_warning_content": "Importar un archivo reemplazará TODOS tus datos actuales. \nEsta acción no se puede deshacer. \n¿Deseas continuar?",
   "settings_import_confirm": "Sí, Continuar",
   "settings_import_success": "Importación completada. Los datos han sido restaurados.",
   "settings_permission_denied": "Permiso de almacenamiento denegado.",
@@ -665,8 +666,8 @@
   "exercise_68_description":"El jalon individual es un ejercicio de desarrollo de fuerza que se dirige a los músculos dorsal ancho de la espalda, mejorando el tono y la definición de los músculos.",
   "exercise_69_name": "Sentadilla Frontal",
   "exercise_69_description":"La sentadilla frontal es un ejercicio de entrenamiento de fuerza muy eficaz que se centra principalmente en los cuádriceps, los glúteos y el tronco, al tiempo que trabaja la parte superior del cuerpo. Las personas suelen realizar sentadillas frontales para mejorar la fuerza de la parte inferior del cuerpo, aumentar la estabilidad del tronco, potenciar la aptitud funcional y mejorar el rendimiento deportivo en general. ",
-  "predefined_template_Push_Routine": "Rutina de empuje",
-  "predefined_template_pull_day": "Día de Tirón",
+  "predefined_template_Push_Routine": "Rutina de Empuje",
+  "predefined_template_pull_day": "Rutina de Jalon",
   "predefined_template_leg_day_basic_name": "Pierna Completa",
   "predefined_template_complete_torso": "Torso Completo"
 

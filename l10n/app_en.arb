@@ -161,7 +161,7 @@
   "training_save_error": "Error saving training",
   "training_no_name": "Exercise without name",
   "training_delete_exercise": "Delete Exercise?",
-  "training_delete_exercise_message": "'{exerciseNameForDialog}' will be permanently deleted from the list of available exercises. This action cannot be undone.",
+  "training_delete_exercise_message": "'{exerciseNameForDialog}' will be permanently deleted from the list of available exercises. \nThis action cannot be undone.",
   "@training_delete_exercise_message": {
     "description": "Confirmation message for deleting an exercise.",
     "placeholders": {
@@ -267,7 +267,7 @@
   "template_donthave": "No templates to delete.",
   "template_id": "Error: Template without ID",
   "template_question": "Delete template?",
-  "template_question1": "Do you want to delete the template '{displayTemplateName}'? This action cannot be undone.",
+  "template_question1": "Do you want to delete the template '{displayTemplateName}'? \nThis action cannot be undone.",
   "@template_question1": {
     "description": "Confirmation message for deleting a template.",
     "placeholders": {
@@ -277,7 +277,7 @@
       }
     }
   },
-  "template_question2": "Do you want to delete the template '{templateName}'? This action cannot be undone.",
+  "template_question2": "Do you want to delete the template '{templateName}'? \nThis action cannot be undone.",
   "@template_question2": {
     "description": "Confirmation message for deleting a template.",
     "placeholders": {
@@ -316,6 +316,7 @@
   "addExercisesToSaveTemplate": "Add exercises to the training to save it as a template.",
   "trainingTitleDefault": "Training of {date}",
   "exerciseOverlayNewExerciseCreated": "Exercise '{exerciseName}' created and available.",
+
   "tips_title": "\uD83D\uDCA1 Tips & Tricks",
   "tips_rm": "RM",
   "tips_rm_text": "To find out your one-repetition maximum, use the following calculator:",
@@ -347,7 +348,9 @@
   "tips_series": "Rest between series",
   "tips_series_text": "3 minutes between sets are ideal for workouts that seek to increase maximum strength and power. They allow for a more complete recovery of the neuromuscular and energy system, which facilitates greater intensity and volume in subsequent sets.",
   "tips_nutrition": "Nutrition",
-  "tips_nutrition_text": "A balanced diet is essential. It is important to reach your maintenance calories or with a little caloric surplus (100 - 200) is sufficient for muscle gains. (There are many websites to calculate your calorie needs). \n -Make sure you consume enough protein (1.8 grams of protein multiplied by your weight) for muscle repair. \n-Carbohydrates are also essential, pre-workout is crucial to optimize performance, especially in long duration or high intensity exercise. \n-Slow-absorbing carbohydrates, such as whole-grain bread or fruit, can help keep energy levels stable throughout your workout.",
+  "tips_nutrition_text": "A balanced diet is essential. \n -Make sure you consume enough protein (2 grams of protein multiplied by your weight can be an approximation.) for muscle repair. \n-Carbohydrates are also essential, pre-workout is crucial to optimize performance, especially in long duration or high intensity exercise. \n-Slow-absorbing carbohydrates, such as whole-grain bread or fruit, can help keep energy levels stable throughout your workout.",
+  "tips_notice_title": "¡Notice!",
+  "tips_notice_text": "While the tips and structure of this app are primarily focused on muscle hypertrophy, its core principles of progressive overload and detailed tracking are perfectly applicable to other strength disciplines like powerlifting, weightlifting, and general fitness.",
   "tips_repositories": "\uD83D\uDD17 Project Repository",
   "tips_repositories_text": "The source code for this application is available on GitHub. This project is open source, which means you can explore how it is built, propose improvements, or even use parts of the code for your own projects. \n \nYour contribution or feedback is always welcome.",
   "tips_repositories_link": "Visit Repository",
@@ -366,7 +369,7 @@
   "calendarFormatWeek": "Week",
   "calendar_title": "Gym Training Calendar",
   "calendar_confirm": "Confirm Deletion of Session",
-  "confirmDeleteSessionDialogContent": "Are you sure you want to delete the session '{sessionTitle}' and all its exercises? This action cannot be undone.",
+  "confirmDeleteSessionDialogContent": "Are you sure you want to delete the session '{sessionTitle}' and all its exercises? \nThis action cannot be undone.",
   "@confirmDeleteSessionDialogContent": {
     "placeholders": {
       "sessionTitle": {
@@ -440,7 +443,7 @@
   "settings_import": "Import data (Restore)",
   "settings_import_subtitle": "Restore data from a backup file",
   "settings_import_warning_title": "Warning!",
-  "settings_import_warning_content": "Importing a file will replace ALL of your current data. This action cannot be undone. Do you wish to continue?",
+  "settings_import_warning_content": "Importing a file will replace ALL of your current data. \nThis action cannot be undone. \nDo you wish to continue?",
   "settings_import_confirm": "Yes, Continue",
   "settings_import_success": "Import complete. Your data has been restored.",
   "settings_permission_denied": "Storage permission denied.",

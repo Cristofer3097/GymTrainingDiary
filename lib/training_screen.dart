@@ -16,6 +16,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../settings.dart';
 import 'package:diacritic/diacritic.dart';
+import 'widgets/stopwatch.dart';
+
 
 
 enum ProgressStatus { improvement, decline, neutral, noData }
@@ -42,6 +44,8 @@ class _TrainingScreenState extends State<TrainingScreen> {
   List<Map<String, dynamic>> availableExercises = [];
   bool _didDataChange = false;
   bool _isTitleInitialized = false;
+  late DateTime _startTime;
+  final Stopwatch _stopwatch = Stopwatch();
 
   void _removeExerciseFromTraining(int index) {
 
@@ -86,6 +90,10 @@ class _TrainingScreenState extends State<TrainingScreen> {
   @override
   void initState() {
     super.initState();
+    _startTime = DateTime.now();
+    if (widget.sessionToEdit == null) {
+      _stopwatch.start();
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) { // Asegúrate de que el widget todavía esté montado
@@ -545,26 +553,33 @@ class _TrainingScreenState extends State<TrainingScreen> {
       final db = DatabaseHelper.instance;
       final String sessionDateTimeStr = DateTime.now().toIso8601String();
       final String currentSessionTitle = trainingTitle;
+      _stopwatch.stop();
+      final int durationInSeconds = _stopwatch.elapsed.inSeconds;
 
       try {
         int sessionId;
         String sessionDateTimeStr;
+        int? finalDuration;
 
         if (widget.sessionToEdit != null) {
           // MODO EDICIÓN: Reutilizamos los datos de la sesión original
           sessionId = widget.sessionToEdit!['id'] as int;
           sessionDateTimeStr = widget.sessionToEdit!['session_dateTime']; // <-- Usamos la fecha original
+          finalDuration = widget.sessionToEdit!['duration'] as int?;
+
 
           // Actualizamos el título si ha cambiado
-          await db.updateTrainingSession(sessionId, currentSessionTitle, sessionDateTimeStr);
+          await db.updateTrainingSession(sessionId, currentSessionTitle, sessionDateTimeStr, finalDuration);
           // Borramos los logs antiguos para reinsertar los nuevos (actualizados)
           await db.clearExerciseLogsForSession(sessionId);
           print("Sesión ID $sessionId actualizada.");
+
         } else {
-          // MODO CREACIÓN: Creamos una nueva sesión con la fecha actual
+          // Creamos una nueva sesión con la fecha actual
           sessionDateTimeStr = DateTime.now().toIso8601String();
-          sessionId = await db.insertTrainingSession(currentSessionTitle, sessionDateTimeStr);
-          print("Nueva sesión guardada con ID: $sessionId");
+          finalDuration = durationInSeconds;
+          sessionId = await db.insertTrainingSession(currentSessionTitle, sessionDateTimeStr, finalDuration);
+          print("Nueva sesión guardada con ID: $sessionId y duración: $finalDuration segs");
         }
 
         // Insertamos los registros de ejercicios (ya sean nuevos o actualizados)
@@ -748,7 +763,12 @@ class _TrainingScreenState extends State<TrainingScreen> {
                         onPressed: _confirmSaveTemplate,
                         label: Text(l10n.training_create_template))),
               ]),
-              SizedBox(height: 16),
+              if (_isTitleInitialized)
+                StopwatchWidget(
+                  startTime: _startTime,
+                  pausedDurationInSeconds: widget.sessionToEdit?['duration'] as int?,
+                ),
+              SizedBox(height: 2),
               if (selectedExercises.isEmpty)
                 Expanded(
                     child: Center(

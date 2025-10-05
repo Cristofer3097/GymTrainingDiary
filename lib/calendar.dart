@@ -27,6 +27,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Map<DateTime, List<dynamic>> _events = {};
   List<Map<String, dynamic>> _selectedDaySessions = []; // Almacenará las sesiones del día
 
+  //Duracion del entrenamiento
+  String _formatDuration(int? totalSeconds) {
+    if (totalSeconds == null || totalSeconds < 0) {
+      return '--:--:--';
+    }
+    final duration = Duration(seconds: totalSeconds);
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    String hours = twoDigits(duration.inHours);
+    String minutes = twoDigits(duration.inMinutes.remainder(60));
+    String seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$hours:$minutes:$seconds";
+  }
 
 
   @override
@@ -308,8 +320,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
               itemBuilder: (context, sessionIndex) {
                 final session = _selectedDaySessions[sessionIndex];
                 final String sessionTitle = session['session_title']?.toString() ?? 'Entrenamiento Sin Título';
+                final int? durationInSeconds = session['duration'] as int?;
                 String sessionTime = "Hora desconocida";
-                try { DateTime dt = DateTime.parse(session['session_dateTime']); sessionTime = DateFormat.Hm(l10n.localeName).format(dt); } catch (_) {} // Usa localeName para DateFormat
+
+                try {
+                  DateTime dt = DateTime.parse(session['session_dateTime']);
+                  // Usa el formato de 12 horas con am/pm
+                  sessionTime = DateFormat.jm(l10n.localeName).format(dt);
+                } catch (_) {}
 
                 return Card(
                   // ... card properties ...
@@ -368,13 +386,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             ],
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(top: 0.0), // Pequeño espacio desde el título
-                            child: Text(
-                              sessionTime,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey.shade500,
-                              ),
+                            padding: const EdgeInsets.only(top: 0.0, bottom: 4.0),// Pequeño espacio desde el título
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  sessionTime,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                                Text(
+                                  _formatDuration(durationInSeconds),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey.shade500,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           SizedBox(height: 12.0),
