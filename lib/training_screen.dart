@@ -39,13 +39,13 @@ class TrainingScreen extends StatefulWidget {
 }
 
 class _TrainingScreenState extends State<TrainingScreen> {
-  late String trainingTitle; // Declarar aquí
+  late String trainingTitle;
   List<Map<String, dynamic>> selectedExercises = [];
   List<Map<String, dynamic>> availableExercises = [];
   bool _didDataChange = false;
   bool _isTitleInitialized = false;
-  late DateTime _startTime;
-  final Stopwatch _stopwatch = Stopwatch();
+  Timer? _timer;
+  Duration _elapsed = Duration.zero;
 
   void _removeExerciseFromTraining(int index) {
 
@@ -87,13 +87,32 @@ class _TrainingScreenState extends State<TrainingScreen> {
     final formatter = DateFormat('dd/MM/yyyy', localeName);
     return formatter.format(now); // Esto producirá algo como "25/05/2025"
   }
+
+  void _startTimer() {
+    // Si la sesión no se está editando, inicia el cronómetro
+    if (widget.sessionToEdit == null) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (mounted) {
+          setState(() {
+            _elapsed = Duration(seconds: _elapsed.inSeconds + 1);
+          });
+        }
+      });
+    } else {
+      // Si se está editando, simplemente establece la duración guardada
+      _elapsed = Duration(seconds: widget.sessionToEdit?['duration'] as int? ?? 0);
+    }
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+  }
+
   @override
   void initState() {
     super.initState();
-    _startTime = DateTime.now();
-    if (widget.sessionToEdit == null) {
-      _stopwatch.start();
-    }
+    _startTimer();
+
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) { // Asegúrate de que el widget todavía esté montado
@@ -551,10 +570,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
     if (confirm == true) {
       final db = DatabaseHelper.instance;
-      final String sessionDateTimeStr = DateTime.now().toIso8601String();
+      _stopTimer();
+      final int durationInSeconds = _elapsed.inSeconds;
       final String currentSessionTitle = trainingTitle;
-      _stopwatch.stop();
-      final int durationInSeconds = _stopwatch.elapsed.inSeconds;
 
       try {
         int sessionId;
@@ -562,7 +580,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
         int? finalDuration;
 
         if (widget.sessionToEdit != null) {
-          // MODO EDICIÓN: Reutilizamos los datos de la sesión original
+          // los datos de la sesión original
           sessionId = widget.sessionToEdit!['id'] as int;
           sessionDateTimeStr = widget.sessionToEdit!['session_dateTime']; // <-- Usamos la fecha original
           finalDuration = widget.sessionToEdit!['duration'] as int?;
@@ -765,8 +783,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
               ]),
               if (_isTitleInitialized)
                 StopwatchWidget(
-                  startTime: _startTime,
-                  pausedDurationInSeconds: widget.sessionToEdit?['duration'] as int?,
+                  elapsed: _elapsed,
                 ),
               SizedBox(height: 2),
               if (selectedExercises.isEmpty)
