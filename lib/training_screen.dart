@@ -44,8 +44,10 @@ class _TrainingScreenState extends State<TrainingScreen> {
   List<Map<String, dynamic>> availableExercises = [];
   bool _didDataChange = false;
   bool _isTitleInitialized = false;
-  Timer? _timer;
-  Duration _elapsed = Duration.zero;
+
+  DateTime? _startTime;
+  Timer? _uiUpdateTimer;
+  Duration _staticDurationForEditing = Duration.zero;
 
   void _removeExerciseFromTraining(int index) {
 
@@ -88,54 +90,48 @@ class _TrainingScreenState extends State<TrainingScreen> {
     return formatter.format(now); // Esto producirá algo como "25/05/2025"
   }
 
-  void _startTimer() {
-    // Si la sesión no se está editando, inicia el cronómetro
+  void _initializeAndStartStopwatch() {
     if (widget.sessionToEdit == null) {
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      // MODO NUEVO ENTRENAMIENTO: Guardamos la hora de inicio
+      _startTime = DateTime.now();
+
+      // Iniciamos un temporizador que solo actualiza la UI para que el cronómetro "avance"
+      _uiUpdateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (mounted) {
           setState(() {
-            _elapsed = Duration(seconds: _elapsed.inSeconds + 1);
+            // No necesitamos calcular nada aquí, solo redibujar.
           });
         }
       });
     } else {
-      // Si se está editando, simplemente establece la duración guardada
-      _elapsed = Duration(seconds: widget.sessionToEdit?['duration'] as int? ?? 0);
+      // MODO EDICIÓN: No iniciamos el cronómetro. Solo mostramos la duración guardada.
+      _staticDurationForEditing =
+          Duration(seconds: widget.sessionToEdit?['duration'] as int? ?? 0);
     }
-  }
-
-  void _stopTimer() {
-    _timer?.cancel();
   }
 
   @override
   void initState() {
     super.initState();
-    _startTimer();
-
+    _initializeAndStartStopwatch();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) { // Asegúrate de que el widget todavía esté montado
+      if (mounted) {
         final l10n = AppLocalizations.of(context)!;
-        final String formattedDate = _getFormattedCurrentDate(context); // Usa la nueva función
-
+        final String formattedDate = _getFormattedCurrentDate(context);
         setState(() {
-          if (widget.templateName != null && widget.templateName!.isNotEmpty) {
-
+          if (widget.sessionToEdit != null) {
+            trainingTitle = widget.sessionToEdit!['session_title']?.toString() ?? l10n.training_title_date(formattedDate);
+          } else if (widget.templateName != null && widget.templateName!.isNotEmpty) {
             trainingTitle = widget.templateName!;
-            _isTitleInitialized = true;
           } else {
-            // Aquí usamos la clave de localización con el placeholder
             trainingTitle = l10n.training_title_date(formattedDate);
           }
+          _isTitleInitialized = true;
         });
       }
     });
-    if (widget.templateName != null && widget.templateName!.isNotEmpty) {
 
-      trainingTitle = widget.templateName!;
-
-    }
     if (widget.initialExercises != null) {
       selectedExercises = widget.initialExercises!.map((ex) {
         var newEx = Map<String, dynamic>.from(ex);
@@ -155,8 +151,8 @@ class _TrainingScreenState extends State<TrainingScreen> {
         newEx['weightUnit'] = newEx['weightUnit']?.toString() ?? 'lb';
         newEx['series'] = newEx['series']?.toString() ?? '';
         newEx['notes'] = newEx['notes']?.toString() ?? '';
-        newEx['db_category_id'] = ex['category_id'];
-        newEx['isManual'] = false;
+        newEx['db_category_id'] = ex['category_id'] ?? ex['id'];
+        newEx['isManual'] = (ex['is_predefined'] ?? 1) == 0;
         return newEx;
       }).toList();
     }
@@ -570,8 +566,11 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
     if (confirm == true) {
       final db = DatabaseHelper.instance;
-      _stopTimer();
-      final int durationInSeconds = _elapsed.inSeconds;
+      _uiUpdateTimer?.cancel();
+      final int durationInSeconds = (widget.sessionToEdit == null && _startTime != null)
+          ? DateTime.now().difference(_startTime!).inSeconds
+          : (widget.sessionToEdit?['duration'] as int? ?? 0);
+
       final String currentSessionTitle = trainingTitle;
 
       try {
@@ -740,6 +739,14 @@ class _TrainingScreenState extends State<TrainingScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    Duration displayDuration;
+    if (widget.sessionToEdit != null) {
+      // Si estamos editando, mostramos la duración estática guardada
+      displayDuration = _staticDurationForEditing;
+    } else {
+      // Si es un nuevo entrenamiento, calculamos la diferencia con la hora de inicio
+      displayDuration = _startTime != null ? DateTime.now().difference(_startTime!) : Duration.zero;
+    }
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -783,7 +790,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
               ]),
               if (_isTitleInitialized)
                 StopwatchWidget(
-                  elapsed: _elapsed,
+                  elapsed: displayDuration,
                 ),
               SizedBox(height: 2),
               if (selectedExercises.isEmpty)
