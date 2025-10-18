@@ -313,7 +313,7 @@
   "removeExerciseDialogTitle": "Quitar Ejercicio",
   "removeExerciseDialogContent": "¿Quitar '{exerciseName}' del entrenamiento? Los datos ingresados para este ejercicio se perderán.",
   "yesRemove": "Sí, Quitar",
-  "exerciseRemovedSuccess": "'{exerciseName}' quitado del entrenamiento",
+  "exerciseRemovedSuccess": "'{exerciseName}' se elimino del entrenamiento",
   "errorRemovingExercise": "Error al quitar el ejercicio. Índice inválido.",
   "addExercisesToSaveTemplate": "Añade ejercicios al entrenamiento para guardarlo como plantilla.",
   "@trainingTitleDefault": {
@@ -666,6 +666,8 @@
   "exercise_68_description":"El jalon individual es un ejercicio de desarrollo de fuerza que se dirige a los músculos dorsal ancho de la espalda, mejorando el tono y la definición de los músculos.",
   "exercise_69_name": "Sentadilla Frontal",
   "exercise_69_description":"La sentadilla frontal es un ejercicio de entrenamiento de fuerza muy eficaz que se centra principalmente en los cuádriceps, los glúteos y el tronco, al tiempo que trabaja la parte superior del cuerpo. Las personas suelen realizar sentadillas frontales para mejorar la fuerza de la parte inferior del cuerpo, aumentar la estabilidad del tronco, potenciar la aptitud funcional y mejorar el rendimiento deportivo en general. ",
+  "exercise_70_name": "Pullover en Maquina",
+  "exercise_70_description":"El pullover en maquina es un ejercicio de entrenamiento de fuerza que se centra principalmente en los músculos de la espalda, los hombros y los brazos, y ofrece una forma eficaz de mejorar la fuerza y la flexibilidad de la parte superior del cuerpo.",
   "predefined_template_Push_Routine": "Rutina de Empuje",
   "predefined_template_pull_day": "Rutina de Jalon",
   "predefined_template_leg_day_basic_name": "Pierna Completa",

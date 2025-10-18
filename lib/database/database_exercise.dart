@@ -504,6 +504,13 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
     'image': 'assets/exercises/front-squat.gif',
     'description': 'The Front Squat is a highly effective strength training exercise that primarily targets the quadriceps, glutes, and core, while also engaging the upper body. People would want to do Front Squats to improve lower body strength, enhance core stability, boost functional fitness, and increase overall athletic performance.',
   },
+  {
+    'id': 70,
+    'name': 'Pullover Machine',
+    'muscle_group': "Back",
+    'image': 'assets/exercises/Pullover-Machine.gif',
+    'description': 'The Pullover Machine is a strength training exercise that primarily targets the muscles in your back, shoulders, and arms, offering an effective way to enhance upper body strength and flexibility.',
+  },
 
 ];
 

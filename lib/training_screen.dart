@@ -54,8 +54,8 @@ class _TrainingScreenState extends State<TrainingScreen> {
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
       if (index >= 0 && index < selectedExercises.length) {
-        final String exerciseNameToRemove =
-            selectedExercises[index]['name']?.toString() ?? 'Ejercicio';
+        final Map<String, dynamic> exerciseToRemove = selectedExercises[index];
+        final String localizedExerciseName = getLocalizedExerciseName(context, exerciseToRemove);
 
         setState(() {
           selectedExercises.removeAt(index);
@@ -64,8 +64,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-              Text(l10n.training_quit_exercise(exerciseNameToRemove))),
+              content: Text(l10n.training_quit_exercise(localizedExerciseName))),
         );
       } else {
         debugPrint(

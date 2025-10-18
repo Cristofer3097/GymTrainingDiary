@@ -77,6 +77,7 @@ String getLocalizedExerciseName(BuildContext context, Map<String, dynamic> exerc
       case 67: return l10n.exercise_67_name;
       case 68: return l10n.exercise_68_name;
       case 69: return l10n.exercise_69_name;
+      case 70: return l10n.exercise_70_name;
 
 
 
@@ -176,6 +177,7 @@ String getLocalizedExerciseDescription(BuildContext context, Map<String, dynamic
       case 67: return l10n.exercise_67_description;
       case 68: return l10n.exercise_68_description;
       case 69: return l10n.exercise_69_description;
+      case 70: return l10n.exercise_70_description;
 
 
 

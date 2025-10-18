@@ -669,7 +669,8 @@
   "exercise_68_description":"Sigle Arm Pulldown is a strength-building exercise that targets the latissimus dorsi muscles of the back, improving muscle tone and definition.",
   "exercise_69_name": "Front Squat",
   "exercise_69_description": "The Front Squat is a highly effective strength training exercise that primarily targets the quadriceps, glutes, and core, while also engaging the upper body. People would want to do Front Squats to improve lower body strength, enhance core stability, boost functional fitness, and increase overall athletic performance.",
-
+  "exercise_70_name": "Pullover Machine",
+  "exercise_70_description": "The Pullover Machine is a strength training exercise that primarily targets the muscles in your back, shoulders, and arms, offering an effective way to enhance upper body strength and flexibility.",
   "predefined_template_Push_Routine": "Push Routine",
   "predefined_template_pull_day": "Pull Day",
   "predefined_template_leg_day_basic_name": "Complete Legs",
