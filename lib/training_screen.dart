@@ -606,7 +606,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
           await db.insertExerciseLogWithSessionId({
             'exercise_name': exercise['name'],
-            'dateTime': sessionDateTimeStr, // Usamos la fecha correcta (original o nueva)
+            'dateTime': sessionDateTimeStr,
             'series': exercise['series']?.toString() ?? '',
             'reps': repsForDb,
             'weight': weightForDb,
@@ -618,9 +618,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(l10n.training_save_success(currentSessionTitle)),
-          behavior: SnackBarBehavior.floating, // <-- AÑADE ESTO
-    margin: const EdgeInsets.all(12.0), // <-- AÑADE UN MARGEN
-    shape: RoundedRectangleBorder( // <-- FORMA OPCIONAL
+          behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.all(12.0),
+    shape: RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(8.0),
     ),
     )
@@ -2002,6 +2002,110 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
     });
   }
 
+  Future<void> _copyLastLogData() async {
+    if (widget.lastLog == null) return;
+    final l10n = AppLocalizations.of(context)!;
+
+    // 1. Verificar si ya hay datos en las series
+    if (seriesController.text.trim().isNotEmpty ||
+        repControllers.any((c) => c.text.trim().isNotEmpty) ||
+        weightControllers.any((c) => c.text.trim().isNotEmpty)) {
+      final bool? confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.training_copy_last), // Texto nuevo
+          content: Text(
+              l10n.training_copy_message), // Texto nuevo
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(l10n.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(l10n.settings_import_confirm),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return; // El usuario canceló
+    }
+
+    // 2. Proceder con la copia de datos
+    final lastLog = widget.lastLog!;
+    setState(() {
+      // Copiar Número de Series
+      final String lastSeries = lastLog['series']?.toString() ?? '0';
+      seriesController.text = lastSeries;
+      seriesCountFromInput = int.tryParse(lastSeries.trim()) ?? 0;
+
+      // Aplicar límites de series y advertencias
+      if (seriesCountFromInput > 4) {
+        seriesWarningText = l10n.training_set_recommend;
+        seriesCountFromInput = 4;
+      } else if (seriesCountFromInput < 0) {
+        seriesWarningText = l10n.training_set_error;
+        seriesCountFromInput = 0;
+      } else {
+        seriesWarningText = "";
+      }
+
+      // Reinicializar los campos de series (esto es crucial)
+      _initializeSeriesSpecificFields();
+
+      // Copiar Notas
+      notesController.text = lastLog['notes']?.toString() ?? '';
+
+      // Copiar Unidad de Peso (toma la primera unidad del registro anterior)
+      final String lastUnitsStr = lastLog['weightUnit']?.toString() ?? '';
+      if (lastUnitsStr.isNotEmpty) {
+        List<String> lastUnits = lastUnitsStr.split(',');
+        if (lastUnits.isNotEmpty) {
+          final String firstUnit = lastUnits[0].trim().toLowerCase();
+          if (firstUnit == 'kg' || firstUnit == 'lb') {
+            weightUnit = firstUnit;
+          }
+        }
+      }
+
+      // Copiar Reps y Peso (DEBE hacerse después de _initializeSeriesSpecificFields)
+      final List<String> lastReps =
+      (lastLog['reps']?.toString() ?? '').split(',');
+      final List<String> lastWeights =
+      (lastLog['weight']?.toString() ?? '').split(',');
+
+      for (int i = 0; i < repControllers.length; i++) {
+        // Asignar reps
+        if (i < lastReps.length) {
+          repControllers[i].text = lastReps[i].trim();
+        } else {
+          repControllers[i].text = ""; // Limpiar si no hay dato
+        }
+
+        // Asignar peso
+        if (i < lastWeights.length) {
+          weightControllers[i].text = lastWeights[i].trim();
+        } else {
+          weightControllers[i].text = ""; // Limpiar si no hay dato
+        }
+
+        // Validar los datos copiados para mostrar advertencias (ej. "subir peso")
+        _validateRepValue(repControllers[i].text, i);
+        _validateWeightValue(weightControllers[i].text, i);
+      }
+
+      // Actualizar los íconos de progreso
+      _updateAllProgressStatuses();
+
+      // Mostrar confirmación
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Datos del último registro copiados."), // Texto nuevo
+          duration: Duration(seconds: 2),
+        ),
+      );
+    });
+  }
 
   void _confirmAndSaveData() {
     final l10n = AppLocalizations.of(context)!;
@@ -2388,7 +2492,6 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
               const SizedBox(height: 24),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                // Alinea los elementos al inicio si tienen alturas diferentes (debido a errores)
                 children: [
                   Expanded(
                     flex: 2,
@@ -2398,15 +2501,13 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                       decoration: InputDecoration(
                         labelText: l10n.training_num_series,
                         labelStyle: seriesLabelStyle,
-                        // Aplicar estilo de etiqueta dinámico
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.0)),
-                        // Borde base
-                        enabledBorder: OutlineInputBorder( // Borde cuando está habilitado
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: seriesEnabledBorderSide,
                         ),
-                        focusedBorder: OutlineInputBorder( // Borde cuando está enfocado
+                        focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.0),
                           borderSide: seriesFocusedBorderSide,
                         ),
@@ -2428,20 +2529,18 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                           } else if (seriesCountFromInput < 0) {
                             seriesWarningText = l10n.training_set_error;
                             seriesCountFromInput =
-                            0; // No mostrar campos si es inválido
+                            0;
                           } else {
                             seriesWarningText =
-                            ""; // Limpiar advertencia para casos válidos (0 a 4 series)
+                            "";
                           }
                           _initializeSeriesSpecificFields(); // Ahora esta función solo prepara los campos
                         });
                       },
                       validator: (value) {
-                        // Si el campo está vacío, no mostramos ningún error.
                         if (value == null || value.trim().isEmpty) {
                           return null;
                         }
-                        // Si no está vacío, aplicamos las demás validaciones.
                         final n = int.tryParse(value.trim());
                         if (n == null) return l10n.training_set_invalid;
                         if (n < 0) return l10n.training_negative;
@@ -2453,7 +2552,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                   SizedBox(width: 12),
                   Expanded(
                     flex: 1,
-                    child: _isUnitInitialized // Solo muestra el dropdown cuando la unidad ha sido inicializada
+                    child: _isUnitInitialized
                         ? DropdownButtonFormField<String>(
                       value: weightUnit,
                       decoration: InputDecoration(
@@ -2611,8 +2710,28 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                   textCapitalization: TextCapitalization.sentences),
               SizedBox(height: 24),
               if (widget.lastLog != null) ...[
-                Text(l10n.training_register,
-                    style: Theme.of(context).textTheme.titleMedium),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(l10n.training_register,
+                        style: Theme.of(context).textTheme.titleMedium),
+
+                    ElevatedButton.icon(
+                      icon: Icon(Icons.history_toggle_off, size: 16),
+                      label: Text(l10n.training_copy_register),
+                      onPressed: _copyLastLogData,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        textStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                        side: BorderSide(color: theme.primaryColor, width: 1.5),
+                        backgroundColor: theme.scaffoldBackgroundColor,
+                        foregroundColor: theme.primaryColor,
+                        elevation: 0,
+                      ),
+                    ),
+                  ],
+                ),
                 SizedBox(height: 8),
                 Builder(builder: (context) {
                   String formattedDate = l10n.training_date_unknown;
