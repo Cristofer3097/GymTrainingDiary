@@ -2013,9 +2013,9 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
       final bool? confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: Text(l10n.training_copy_last), // Texto nuevo
+          title: Text(l10n.training_copy_last),
           content: Text(
-              l10n.training_copy_message), // Texto nuevo
+              l10n.training_copy_message),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
@@ -2028,18 +2028,16 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
           ],
         ),
       );
-      if (confirmed != true) return; // El usuario canceló
+      if (confirmed != true) return;
     }
 
     // 2. Proceder con la copia de datos
     final lastLog = widget.lastLog!;
     setState(() {
-      // Copiar Número de Series
       final String lastSeries = lastLog['series']?.toString() ?? '0';
       seriesController.text = lastSeries;
       seriesCountFromInput = int.tryParse(lastSeries.trim()) ?? 0;
 
-      // Aplicar límites de series y advertencias
       if (seriesCountFromInput > 4) {
         seriesWarningText = l10n.training_set_recommend;
         seriesCountFromInput = 4;
@@ -2050,13 +2048,10 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
         seriesWarningText = "";
       }
 
-      // Reinicializar los campos de series (esto es crucial)
       _initializeSeriesSpecificFields();
 
-      // Copiar Notas
       notesController.text = lastLog['notes']?.toString() ?? '';
 
-      // Copiar Unidad de Peso (toma la primera unidad del registro anterior)
       final String lastUnitsStr = lastLog['weightUnit']?.toString() ?? '';
       if (lastUnitsStr.isNotEmpty) {
         List<String> lastUnits = lastUnitsStr.split(',');
@@ -2068,7 +2063,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
         }
       }
 
-      // Copiar Reps y Peso (DEBE hacerse después de _initializeSeriesSpecificFields)
+      // Copia Reps y Peso
       final List<String> lastReps =
       (lastLog['reps']?.toString() ?? '').split(',');
       final List<String> lastWeights =
@@ -2079,17 +2074,17 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
         if (i < lastReps.length) {
           repControllers[i].text = lastReps[i].trim();
         } else {
-          repControllers[i].text = ""; // Limpiar si no hay dato
+          repControllers[i].text = "";
         }
 
         // Asignar peso
         if (i < lastWeights.length) {
           weightControllers[i].text = lastWeights[i].trim();
         } else {
-          weightControllers[i].text = ""; // Limpiar si no hay dato
+          weightControllers[i].text = "";
         }
 
-        // Validar los datos copiados para mostrar advertencias (ej. "subir peso")
+        // Valida los datos copiados para mostrar advertencias
         _validateRepValue(repControllers[i].text, i);
         _validateWeightValue(weightControllers[i].text, i);
       }
@@ -2100,7 +2095,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
       // Mostrar confirmación
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Datos del último registro copiados."), // Texto nuevo
+          content: Text("Datos del último registro copiados."),
           duration: Duration(seconds: 2),
         ),
       );
