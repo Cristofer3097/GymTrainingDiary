@@ -4,14 +4,12 @@ import 'calendar.dart'; //
 import '../database/database_helper.dart'; //
 import 'package:intl/date_symbol_data_local.dart';
 import 'extras.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../utils/localization_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'settings.dart';
 import 'ai_screen.dart';
-import 'widgets/app_bottom_nav_bar.dart';
 import 'widgets/app_bottom_nav_bar.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -238,30 +236,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-// --- WIDGET  PARA LOS BOTONES DE NAVEGACIÓN ---
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return Expanded(
-      child: TextButton(
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        onPressed: onPressed,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 20),
-            const SizedBox(height: 4),
-            Text(label, style: const TextStyle(fontSize: 12)),
-          ],
-        ),
-      ),
-    );
-  }
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
