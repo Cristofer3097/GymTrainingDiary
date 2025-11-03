@@ -261,7 +261,10 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const TrainingScreen()), //
+                  MaterialPageRoute(
+                    builder: (context) => const TrainingScreen(),
+                    settings: const RouteSettings(name: 'TrainingScreen'),
+                  ),
                 );
                 if (result == true) {
                   _loadTemplates(); //

@@ -8,10 +8,12 @@ import '../calendar.dart';
 import '../extras.dart';
 import '../main.dart';
 import '../settings.dart';
+import '../training_screen.dart';
 
 class AppBottomNavBar extends StatelessWidget {
   // Esta variable nos dirá qué pantalla está activa para pintarla de blanco
   final String? activeRoute;
+
 
   const AppBottomNavBar({super.key, this.activeRoute});
 
@@ -49,10 +51,23 @@ class AppBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // Obtenemos la referencia a la función onLocaleChange para pasarla a Settings
     final myAppState = context.findAncestorStateOfType<MyAppState>();
-
+    final bool isTrainingInProgress = TrainingScreen.isTrainingInProgress;
+    final bool isTrainingActive = activeRoute == l10n.training_title;
     const menuLabel = 'Menú';
+
+    void navigate(BuildContext ctx, Widget page) {
+      if (isTrainingInProgress) {
+        if (page.runtimeType.toString() == 'AiScreen' && activeRoute == l10n.ai_title) return;
+        if (page.runtimeType.toString() == 'CalendarScreen' && activeRoute == l10n.calendar) return;
+        if (page.runtimeType.toString() == 'TipsExtrasScreen' && activeRoute == l10n.tipsAndExtras) return;
+        if (page.runtimeType.toString() == 'Settings' && activeRoute == l10n.settings_title) return;
+
+        Navigator.push(ctx, MaterialPageRoute(builder: (_) => page));
+      } else {
+        Navigator.pushReplacement(ctx, MaterialPageRoute(builder: (_) => page));
+      }
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -67,7 +82,7 @@ class AppBottomNavBar extends StatelessWidget {
             isActive: activeRoute == l10n.ai_title,
             onPressed: () {
               if (activeRoute == l10n.ai_title) return;
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AiScreen()));
+              navigate(context, const AiScreen());
             },
           ),
           _buildNavItem(
@@ -77,23 +92,37 @@ class AppBottomNavBar extends StatelessWidget {
             isActive: activeRoute == l10n.calendar,
             onPressed: () {
               if (activeRoute == l10n.calendar) return;
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const CalendarScreen()));
+              navigate(context, const CalendarScreen());
             },
           ),
-          _buildNavItem(
-            context: context,
-            icon: Icons.home_rounded, // Un ícono de inicio
-            label: l10n.diary,
-            isActive: activeRoute == l10n.diary,
-            onPressed: () {
-              if (activeRoute == l10n.diary || myAppState == null) return;
-              // Navega de vuelta a la pantalla principal
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => HomeScreen(onLocaleChange: myAppState.setLocale)),
-              );
-            },
-          ),
+          if (isTrainingInProgress)
+            _buildNavItem(
+              context: context,
+              icon: Icons.fitness_center,
+              label: l10n.training_title,
+              isActive: activeRoute == l10n.training_title,
+              onPressed: () {
+                if (activeRoute == l10n.training_title) return;
+
+                Navigator.of(context).popUntil(
+                        (route) => route.settings.name == 'TrainingScreen' || route.isFirst
+                );
+              },
+            )
+          else
+            _buildNavItem(
+              context: context,
+              icon: Icons.home_rounded,
+              label: l10n.diary,
+              isActive: activeRoute == l10n.diary,
+              onPressed: () {
+                if (activeRoute == l10n.diary || myAppState == null) return;
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => HomeScreen(onLocaleChange: myAppState.setLocale)),
+                );
+              },
+            ),
           _buildNavItem(
             context: context,
             icon: Icons.lightbulb,
@@ -101,7 +130,7 @@ class AppBottomNavBar extends StatelessWidget {
             isActive: activeRoute == l10n.tipsAndExtras,
             onPressed: () {
               if (activeRoute == l10n.tipsAndExtras) return;
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const TipsExtrasScreen()));
+              navigate(context, const TipsExtrasScreen());
             },
           ),
           _buildNavItem(
@@ -112,7 +141,7 @@ class AppBottomNavBar extends StatelessWidget {
             onPressed: () {
               if (activeRoute == l10n.settings_title) return;
               if (myAppState != null) {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => Settings(onLocaleChange: myAppState.setLocale)));
+                navigate(context, Settings(onLocaleChange: myAppState.setLocale));
               }
             },
           ),

@@ -120,6 +120,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           initialExercises: reconstructedExercises,
           templateName: sessionTitle,
         ),
+        settings: const RouteSettings(name: 'TrainingScreen'),
       ),
     );
 

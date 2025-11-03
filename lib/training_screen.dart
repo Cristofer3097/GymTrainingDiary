@@ -17,12 +17,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../settings.dart';
 import 'package:diacritic/diacritic.dart';
 import 'widgets/stopwatch.dart';
-
+import 'widgets/app_bottom_nav_bar.dart';
 
 
 enum ProgressStatus { improvement, decline, neutral, noData }
 // Clase principal de la pantalla de Entrenamiento
 class TrainingScreen extends StatefulWidget {
+  static bool isTrainingInProgress = false;
   final List<Map<String, dynamic>>? initialExercises;
   final String? templateName;
   final Map<String, dynamic>? sessionToEdit;
@@ -112,6 +113,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
   @override
   void initState() {
     super.initState();
+    TrainingScreen.isTrainingInProgress = true;
     _initializeAndStartStopwatch();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -326,10 +328,13 @@ class _TrainingScreenState extends State<TrainingScreen> {
 
   Future<bool> _onWillPop() async {
     final l10n = AppLocalizations.of(context)!;
+
     if (selectedExercises.isEmpty && !_didDataChange) {
+      TrainingScreen.isTrainingInProgress = false;
       Navigator.of(context).pop(false);
       return false;
     }
+
     final String dialogMessage = l10n.training_cancel_training;
     final result = await showDialog<bool>(
       context: context,
@@ -340,13 +345,14 @@ class _TrainingScreenState extends State<TrainingScreen> {
           TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               child: Text("No")),
-          ElevatedButton( // Para destacar la acción de salida
+          ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: Text(l10n.training_cancel_exit)),
         ],
       ),
     );
     if (result == true) {
+      TrainingScreen.isTrainingInProgress = false;
       Navigator.of(context).pop(_didDataChange);
       return false;
     }
@@ -626,6 +632,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
     )
     );
     _didDataChange = true;
+          TrainingScreen.isTrainingInProgress = false;
           Navigator.pop(context, _didDataChange);
         }
       } catch (e) {
@@ -761,6 +768,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
               child: Text(l10n.cancel, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
             ),
           ],
+        ),
+        bottomNavigationBar: AppBottomNavBar(
+        activeRoute: l10n.training_title,
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -2349,6 +2359,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
       controller.dispose();
     for (var controller in weightControllers)
       controller.dispose();
+    TrainingScreen.isTrainingInProgress = false;
     super.dispose();
   }
 
