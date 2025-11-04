@@ -1,4 +1,3 @@
-// En calendar_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -9,7 +8,6 @@ import '../training_screen.dart';
 import '../utils/localization_utils.dart';
 import 'widgets/app_bottom_nav_bar.dart';
 
-import '../main.dart';
 
 
 class CalendarScreen extends StatefulWidget {
@@ -329,9 +327,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   // Usa el formato de 12 horas con am/pm
                   sessionTime = DateFormat.jm(l10n.localeName).format(dt);
                 } catch (_) {}
+                final bool isTrainingActive =
+                    TrainingScreen.isTrainingInProgress;
+
+                final String buttonTooltip = isTrainingActive
+                    ? "Termina tu entrenamiento actual para poder ${l10n.training_edit_title}" // Puedes crear una nueva clave l10n si prefieres
+                    : l10n.training_edit_title;
+
+                final String deleteTooltip = isTrainingActive
+                    ? "Termina tu entrenamiento actual para poder ${l10n.deleteButton}"
+                    : l10n.deleteButton;
 
                 return Card(
-                  // ... card properties ...
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 12.0, 8.0, 12.0),
                       child: Column(
@@ -355,34 +362,75 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               Row( // Un Row para los botones
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.edit_note,
+                                      color: isTrainingActive
+                                          ? Colors.grey
+                                          : Theme.of(context)
+                                          .primaryColor,
+                                    ),
+                                    tooltip: buttonTooltip,
+                                    visualDensity: VisualDensity.compact,
+                                    onPressed: () {
+                                      if (isTrainingActive) {
+                                        // 3. Muestra el SnackBar si está activo
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(l10n.calendar_action_disabled_message),
+                                            backgroundColor: Colors.redAccent,
+                                          ),
+                                        );
+                                      } else {
+                                        _editTrainingSession(session);
+                                      }
+                                    },
+                                  ),
 
-                              // --- INICIO DEL CAMBIO ---
-                              IconButton(
-                                icon: Icon(Icons.edit_note, color: Theme.of(context).primaryColor),
-                                tooltip: l10n.training_edit_title, // Reutilizamos una clave de localización
-                                visualDensity: VisualDensity.compact,
-                                onPressed: () => _editTrainingSession(session), // Llama a la nueva función
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.delete_outline, color: Colors.red.shade400),
-                                tooltip: l10n.deleteButton,
-                                visualDensity: VisualDensity.compact,
-                                onPressed: () async {
-                                  // Llama directamente al diálogo de confirmación
-                                  final bool? deletionConfirmed = await _showConfirmDeleteSessionDialog(context, session);
-                                  if (deletionConfirmed == true) {
-                                    if (mounted && _selectedDay != null) {
-                                      await _loadSessionsForSelectedDay(_selectedDay!);
-                                      await _loadDatesWithTrainingSessions();
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(l10n.calendar_session_delete(sessionTitle))),
-                                      );
-                                    }
-                                  }
-                                },
-                              ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.delete_outline,
+                                      color: isTrainingActive
+                                          ? Colors.grey
+                                          : Colors.red.shade400,
+                                    ),
+                                    tooltip: deleteTooltip,
+                                    visualDensity: VisualDensity.compact,
+                                    onPressed: () async {
+                                      if (isTrainingActive) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(l10n.calendar_action_disabled_message),
+                                            backgroundColor: Colors.redAccent,
+                                          ),
+                                        );
+                                      } else {
+                                      final bool? deletionConfirmed =
+                                      await _showConfirmDeleteSessionDialog(
+                                          context, session);
+                                      if (deletionConfirmed ==
+                                          true) {
+                                        if (mounted &&
+                                            _selectedDay != null) {
+                                          await _loadSessionsForSelectedDay(
+                                              _selectedDay!);
+                                          await _loadDatesWithTrainingSessions();
+                                          ScaffoldMessenger.of(
+                                              context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content: Text(l10n
+                                                    .calendar_session_delete(
+                                                    sessionTitle))),
+                                          );
+                                        }
+                                      }
+    }
+    },
+                                  ),
                                 ],
-
                               ),
                             ],
                           ),

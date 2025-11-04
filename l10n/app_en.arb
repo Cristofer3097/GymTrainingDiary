@@ -381,6 +381,7 @@
     }
   },
   "calendar_selection": "Select an action for this training session.",
+  "calendar_action_disabled_message": "Cannot edit or delete until you finish or cancel the current training.",
   "calendar_action": "Actions for: '{sessionTitle}",
   "@calendar_action": {
     "placeholders": {

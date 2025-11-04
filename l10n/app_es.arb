@@ -389,6 +389,7 @@
     }
   },
   "calendar_selection": "Selecciona una acción para esta sesión de entrenamiento.",
+  "calendar_action_disabled_message": "No se puede editar o borrar hasta que termines o canceles el entrenamiento actual.",
   "calendar_action": "Acciones para: '{sessionTitle}",
   "@calendar_action": {
     "placeholders": {
