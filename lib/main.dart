@@ -624,6 +624,7 @@ class TemplatePreviewDialog extends StatelessWidget {
                   initialExercises: exercises, //
                   templateName: templateName, //
                 ),
+                settings: const RouteSettings(name: 'TrainingScreen'),
               ),
             );
             if (Navigator.of(context).canPop()) { //

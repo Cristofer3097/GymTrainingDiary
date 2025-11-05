@@ -26,7 +26,7 @@ class DatabaseHelper {
     final path = join(documentsDirectory.path, filePath);
     return await openDatabase(
       path,
-      version: 11,
+      version: 12,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -185,11 +185,17 @@ class DatabaseHelper {
       await db.execute('ALTER TABLE training_sessions ADD COLUMN duration INTEGER');
       print("Migración a v11 completada.");
     }
+    if (oldVersion < 12) {
+      print("Migración a v12: Forzando resincronización de datos predefinidos (corrección de plantillas)...");
+      await _synchronizePredefinedData(db);
+      print("Migración a v12 completada.");
+    }
   }
 
 
   Future<void> _synchronizePredefinedData(Database db) async {
     print("Iniciando sincronización de datos predefinidos...");
+    var exerciseBatch = db.batch();
     final batch = db.batch();
 
     // 1. Sincronizar Ejercicios
@@ -200,7 +206,6 @@ class DatabaseHelper {
           where: 'original_id = ? AND is_predefined = 1',
           whereArgs: [originalId],
           limit: 1
-
       );
 
       Map<String, dynamic> dataToInsertOrUpdate = {
@@ -214,7 +219,7 @@ class DatabaseHelper {
 
       if (existingExercise.isNotEmpty) {
         // El ejercicio ya existe, lo actualizamos
-        batch.update(
+        exerciseBatch.update(
             'categories',
             dataToInsertOrUpdate,
             where: 'id = ?',
@@ -222,14 +227,17 @@ class DatabaseHelper {
         );
       } else {
         // El ejercicio es nuevo, lo insertamos
-        batch.insert(
+        exerciseBatch.insert(
             'categories',
             dataToInsertOrUpdate,
-            conflictAlgorithm: ConflictAlgorithm.ignore // Por si acaso el nombre ya fue tomado por un ejercicio de usuario
+            conflictAlgorithm: ConflictAlgorithm.ignore
         );
       }
     }
 
+    await exerciseBatch.commit(noResult: true);
+    print("Sincronización de Ejercicios completada.");
+    var templateBatch = db.batch();
     // 2. Sincronizar Plantillas
     for (final templateData in predefinedTemplatesData) {
       String templateKey = templateData['templateKey'] as String;
@@ -253,8 +261,7 @@ class DatabaseHelper {
       // Si tenemos un ID válido, sincronizamos sus ejercicios
       if(templateId > 0) {
         // Borramos las asociaciones viejas para asegurar una lista limpia
-        batch.delete('template_exercises', where: 'template_id = ?', whereArgs: [templateId]);
-
+        templateBatch.delete('template_exercises', where: 'template_id = ?', whereArgs: [templateId]);
         List<int> exerciseSourceIds = templateData['exerciseSourceIds'] as List<int>;
 
         for (int sourceId in exerciseSourceIds) {
@@ -282,6 +289,7 @@ class DatabaseHelper {
     await batch.commit(noResult: true);
     print("Sincronización de datos predefinidos finalizada.");
   }
+
   Future<void> deleteCategory(int id) async {
     final db = await database;
     await db.delete('categories', where: 'id = ?', whereArgs: [id]);
