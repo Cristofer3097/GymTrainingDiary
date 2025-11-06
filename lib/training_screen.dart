@@ -1731,7 +1731,6 @@ class _NewExerciseDialogState extends State<NewExerciseDialog> {
   }
 }
 
-// ----------- ExerciseDataDialog Widget (CON CAMBIOS IMPORTANTES) -----------
 class ExerciseDataDialog extends StatefulWidget {
   final Map<String, dynamic> exercise;
   final Map<String, dynamic>? lastLog;
@@ -2359,7 +2358,6 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
       controller.dispose();
     for (var controller in weightControllers)
       controller.dispose();
-    TrainingScreen.isTrainingInProgress = false;
     super.dispose();
   }
 
