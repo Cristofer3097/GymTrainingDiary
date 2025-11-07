@@ -1051,21 +1051,26 @@ class _ExerciseOverlayState extends State<ExerciseOverlay> {
   String filterCategory = '';
   static const double iconButtonWidth = 48.0;
   final List<String> _canonicalMuscleGroupKeys = [
-    '', // Representa "Todas las Categorías"
+    '', // Todas las Categorías
     'Chest', 'Quadriceps', 'Back', 'Biceps','Triceps', 'Shoulders','Trapeze', 'Glutes','Hamstrings', 'Calves', 'Abs', 'Other'
 
   ];
-
+  late final TextEditingController _searchController;
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController();
     exercises = List.from(widget.availableExercises);
     if (exercises.isEmpty) {
       debugPrint("ExerciseOverlay initState: La lista inicial 'availableExercises' está vacía. Intentando refrescar...");
       refreshExercises();
     }
   }
-
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
   @override
   void didUpdateWidget(covariant ExerciseOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1172,15 +1177,56 @@ class _ExerciseOverlayState extends State<ExerciseOverlay> {
         children: [
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Expanded(
-                child: TextField(
-                    decoration: InputDecoration(
-                        labelText: l10n.training_search_exercise,
-                        prefixIcon: Icon(Icons.search)),
-                    onChanged: (value) =>
-                        setState(() => searchQuery = value))),
-            IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () => Navigator.pop(context))
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  labelText: l10n.training_search_exercise,
+                  prefixIcon: Icon(Icons.search),
+
+                  suffixIcon: searchQuery.isEmpty
+                      ? null
+                      : IconButton(
+                    icon: Icon(
+                      Icons.clear,
+                      color: Colors.white54,
+                      size: 20,
+                    ),
+                    tooltip: "Borrar",
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() {
+                        searchQuery = '';
+                      });
+                    },
+                  ),
+                ),
+                onChanged: (value) =>
+                    setState(() => searchQuery = value),
+              ),
+            ),
+            const SizedBox(width: 8),
+
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context).primaryColor,
+                  width: 1,
+                ),
+                color: Colors.black12,
+              ),
+              child: IconButton(
+                icon: Icon(
+                  Icons.close,
+                  color: Theme.of(context).primaryColor,
+                ),
+                tooltip: l10n.cancel,
+                onPressed: () => Navigator.pop(context),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.all(8),
+                constraints: BoxConstraints.tightFor(width: 40, height: 40),
+              ),
+            ),
           ]),
           Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
