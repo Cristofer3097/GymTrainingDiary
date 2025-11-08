@@ -2954,7 +2954,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
     final String localizedExerciseDescription = getLocalizedExerciseDescription(
         context, exerciseDefinition);
     final String canonicalCategoryKey = exerciseDefinition['category']
-        ?.toString() ?? ''; // Suponiendo que 'category' tiene la clave canónica
+        ?.toString() ?? '';
     final String localizedCategory = getLocalizedCategoryName(
         context, canonicalCategoryKey);
     final l10n = AppLocalizations.of(context)!;
@@ -3003,27 +3003,65 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                 ?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,),),
           SizedBox(height: 10), Divider(), SizedBox(height: 10),
-          Text(
-            AppLocalizations.of(context)!.category,
-            // Ejemplo de cómo usar l10n para "Descripción:"
-            style: Theme
-                .of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.w600),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "${AppLocalizations.of(context)!.category}: ",
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).primaryColor
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  localizedCategory,
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(
+                      height: 1.4,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white
+                  ),
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 6),
-          Text(
-            localizedExerciseDescription.isNotEmpty
-                ? localizedExerciseDescription
-                : l10n.training_description_unknown,
-            // Usar descripción localizada
-            style: Theme
-                .of(context)
-                .textTheme
-                .bodyLarge
-                ?.copyWith(height: 1.5),
-          ),
+
+          SizedBox(height: 16),
+
+
+    Text(
+    localizedExerciseDescription.isNotEmpty
+    ? localizedExerciseDescription
+        : l10n.training_description_unknown,
+    style: Theme
+        .of(context)
+        .textTheme
+        .titleMedium
+        ?.copyWith(
+    fontWeight: FontWeight.w600,
+    ),
+    ),
+    SizedBox(height: 6),
+
+    // 4. VALOR de la descripción
+    Text(
+    localizedExerciseDescription.isNotEmpty
+    ? localizedExerciseDescription
+    : l10n.training_description_unknown, // [cite: 21, 155]
+    style: Theme
+        .of(context)
+        .textTheme
+        .bodyLarge
+        ?.copyWith(height: 1.5),
+    ),
           if (isManualExercise) ...[
             const SizedBox(height: 24), // Espacio antes del botón
             Center(
