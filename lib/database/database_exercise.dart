@@ -511,6 +511,27 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
     'image': 'assets/exercises/Pullover-Machine.gif',
     'description': 'The Pullover Machine is a strength training exercise that primarily targets the muscles in your back, shoulders, and arms, offering an effective way to enhance upper body strength and flexibility.',
   },
+  {
+    'id': 71,
+    'name': 'Reverse Grip Biceps Curl',
+    'muscle_group': "Forearm",
+    'image': 'assets/exercises/Curl-reverse.gif',
+    'description': 'The Reverse Grip Biceps Curl is a strength training exercise that targets not only the biceps, but also the brachialis and brachioradialis, offering a comprehensive workout for your upper arm muscles.',
+  },
+  {
+    'id': 72,
+    'name': 'Wrist curl dumbbell',
+    'muscle_group': "Forearm",
+    'image': 'assets/exercises/Wrist-dumbbell.gif',
+    'description': 'The wrist curl dumbbell is a strength-building exercise that primarily targets the forearm muscles, improving grip, enhancing wrist flexibility, and promoting better arm stability. It is an ideal workout for athletes who rely on their forearm strength and wrist control, like tennis players, climbers, and weightlifters. Incorporating this exercise into your routine can help improve performance in sports and daily activities that require wrist action, and can also help prevent wrist and forearm injuries.',
+  },
+  {
+    'id': 73,
+    'name': 'Cable Wrist Curl',
+    'muscle_group': "Forearm",
+    'image': 'assets/exercises/Cable-Wrist-Curl.gif',
+    'description': 'The Cable Wrist Curl is a strength-building exercise specifically designed to target and enhance the muscles in your forearms. It is ideal for athletes, bodybuilders, or anyone looking to improve their grip strength, wrist stability, or forearm size. Incorporating this exercise into your routine can lead to better performance in activities requiring hand strength and can help prevent wrist and forearm injuries.',
+  },
 
 ];
 

@@ -1052,7 +1052,7 @@ class _ExerciseOverlayState extends State<ExerciseOverlay> {
   static const double iconButtonWidth = 48.0;
   final List<String> _canonicalMuscleGroupKeys = [
     '', // Todas las Categorías
-    'Chest', 'Quadriceps', 'Back', 'Biceps','Triceps', 'Shoulders','Trapeze', 'Glutes','Hamstrings', 'Calves', 'Abs', 'Other'
+    'Chest', 'Quadriceps', 'Back', 'Biceps','Triceps', 'Shoulders','Trapeze', 'Glutes','Hamstrings', 'Calves', 'Forearm', 'Abs', 'Other'
 
   ];
   late final TextEditingController _searchController;
@@ -1446,7 +1446,7 @@ class _NewExerciseDialogState extends State<NewExerciseDialog> {
   String? _initialImagePathPreview;
 
   final List<String> _canonicalMuscleGroupKeysForDialog = [
-    'Chest', 'Quadriceps', 'Back', 'Biceps', 'Triceps', 'Shoulders','Trapeze', 'Glutes', 'Hamstrings', 'Calves', 'Abs', 'Other'
+    'Chest', 'Quadriceps', 'Back', 'Biceps', 'Triceps', 'Shoulders','Trapeze', 'Glutes', 'Hamstrings', 'Calves', 'Forearm', 'Abs', 'Other'
   ];
 
   bool get isEditMode => widget.exerciseToEdit != null;

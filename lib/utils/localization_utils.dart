@@ -78,9 +78,9 @@ String getLocalizedExerciseName(BuildContext context, Map<String, dynamic> exerc
       case 68: return l10n.exercise_68_name;
       case 69: return l10n.exercise_69_name;
       case 70: return l10n.exercise_70_name;
-
-
-
+      case 71: return l10n.exercise_71_name;
+      case 72: return l10n.exercise_72_name;
+      case 73: return l10n.exercise_73_name;
 
       default:
       // Fallback al nombre almacenado en la BD si el ID no está en el switch
@@ -178,9 +178,9 @@ String getLocalizedExerciseDescription(BuildContext context, Map<String, dynamic
       case 68: return l10n.exercise_68_description;
       case 69: return l10n.exercise_69_description;
       case 70: return l10n.exercise_70_description;
-
-
-
+      case 71: return l10n.exercise_71_description;
+      case 72: return l10n.exercise_72_description;
+      case 73: return l10n.exercise_73_description;
 
       default:
         debugPrint("Advertencia: ID de ejercicio predefinido '$originalId' no encontrado en getLocalizedExerciseDescription. Usando descripción de BD.");
@@ -206,6 +206,7 @@ String getLocalizedCategoryName(BuildContext context, String categoryKey) {
     case 'Glutes': return l10n.category_glutes;
     case 'Hamstrings': return l10n.category_Hamstrings;
     case 'Calves': return l10n.category_calves;
+    case 'Forearm': return l10n.category_forearm;
     case 'Abs': return l10n.category_abs;
     case 'Other': return l10n.category_other;
     default:
