@@ -1459,7 +1459,6 @@ class _NewExerciseDialogState extends State<NewExerciseDialog> {
       nameController.text = exerciseData['name'] ?? '';
       descriptionController.text = exerciseData['description'] ?? '';
 
-      // --- MODIFICACIÓN IMPORTANTE AQUÍ ---
       // Obtiene el valor del grupo muscular que viene del ejercicio a editar.
       // Recuerda que en _openEditExerciseDialog, 'muscle_group' se pobló con widget.exercise['category'].
       String? initialCanonicalMuscleGroup = exerciseData['muscle_group']?.toString();
@@ -3037,18 +3036,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
           SizedBox(height: 16),
 
 
-    Text(
-    localizedExerciseDescription.isNotEmpty
-    ? localizedExerciseDescription
-        : l10n.training_description_unknown,
-    style: Theme
-        .of(context)
-        .textTheme
-        .titleMedium
-        ?.copyWith(
-    fontWeight: FontWeight.w600,
-    ),
-    ),
+
     SizedBox(height: 6),
 
     // 4. VALOR de la descripción
@@ -3063,11 +3051,11 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
         ?.copyWith(height: 1.5),
     ),
           if (isManualExercise) ...[
-            const SizedBox(height: 24), // Espacio antes del botón
+            const SizedBox(height: 24),
             Center(
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.edit),
-                label: Text(l10n.training_edit_title), // Usamos la nueva clave
+                label: Text(l10n.training_edit_title),
                 onPressed: () {
                   _openEditExerciseDialog(context);
                 },
