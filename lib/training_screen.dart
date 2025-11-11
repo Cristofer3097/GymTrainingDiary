@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../database/database_helper.dart'; // Asegúrate que la ruta sea correcta
+import '../database/database_helper.dart'; 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:intl/intl.dart'; // Para formateo de fechas si es necesario
 import '../utils/localization_utils.dart';
@@ -1022,7 +1022,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
   }
 }
 
-// ----------- ExerciseOverlay Widget (Sin cambios importantes en esta iteración, se mantiene igual que la anterior) -----------
 class ExerciseOverlay extends StatefulWidget {
   final Future<List<Map<String, dynamic>>> Function() getAvailableExercises;
   final List<Map<String, dynamic>> availableExercises;
@@ -1634,7 +1633,6 @@ class _NewExerciseDialogState extends State<NewExerciseDialog> {
                           String trimmedName = nameController.text.trim();
                           String? imagePathToSave;
 
-                          // --- INICIO DE LA LÓGICA CORREGIDA ---
                           if (_imageFile != null) {
                             // 1. Obtener el directorio de documentos de la app (lugar seguro y permanente).
                             final directory = await getApplicationDocumentsDirectory();
@@ -1656,7 +1654,6 @@ class _NewExerciseDialogState extends State<NewExerciseDialog> {
                             // Si no se tocó la imagen en modo edición, se mantiene la ruta que ya tenía.
                             imagePathToSave = widget.exerciseToEdit!['image'];
                           }
-                          // --- FIN DE LA LÓGICA CORREGIDA ---
 
                           Map<String, dynamic> exerciseDataForDb = {
                             'name': trimmedName,
@@ -1719,7 +1716,6 @@ class _NewExerciseDialogState extends State<NewExerciseDialog> {
                               });
                             }
                           } else { // Creando un nuevo ejercicio
-                            // --- Verificación de nombre duplicado ANTES de insertar ---
                             final actualDb = await db.database;
                             List<Map<String, dynamic>> existingExercises = await actualDb.query(
                               'categories',
@@ -1750,7 +1746,6 @@ class _NewExerciseDialogState extends State<NewExerciseDialog> {
                               }
                               return; // Detener la ejecución si el nombre está duplicado
                             }
-                            // --- Fin de la verificación ---
 
                             // Si no hay duplicados, proceder con la inserción
                             final newExerciseId = await db.insertCategory(exerciseDataForDb);
@@ -2060,7 +2055,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
     if (widget.lastLog == null) return;
     final l10n = AppLocalizations.of(context)!;
 
-    // 1. Verificar si ya hay datos en las series
+    // Verifica si ya hay datos en las series
     if (seriesController.text.trim().isNotEmpty ||
         repControllers.any((c) => c.text.trim().isNotEmpty) ||
         weightControllers.any((c) => c.text.trim().isNotEmpty)) {
@@ -2085,7 +2080,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
       if (confirmed != true) return;
     }
 
-    // 2. Proceder con la copia de datos
+    // Proceder con la copia de datos
     final lastLog = widget.lastLog!;
     setState(() {
       final String lastSeries = lastLog['series']?.toString() ?? '0';
@@ -2213,7 +2208,6 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
 
         String weightValStr = weightControllers[i].text.trim().replaceAll(
             ',', '.');
-        // --- CAMBIO 3: Se valida solo si el campo de peso NO está vacío ---
         if (weightValStr.isNotEmpty) {
           double? w = double.tryParse(weightValStr);
           if (w == null) {
@@ -2570,7 +2564,6 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                           seriesCountFromInput = int.tryParse(value.trim()) ??
                               0;
 
-                          // --- LÓGICA DE ADVERTENCIA MOVIDA AQUÍ ---
                           if (seriesCountFromInput >
                               4) { // Límite que quieres restaurar
                             seriesWarningText = l10n.training_set_recommend;
@@ -2859,21 +2852,20 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Contenedor para el gráfico con altura definida
                 SizedBox(
                   height: MediaQuery
                       .of(context)
                       .size
-                      .height * 0.3, // Aprox. mitad de la ventana
+                      .height * 0.3,
                   child: _buildHistoryChart(context, logs),
 
                 ),
                 const SizedBox(height: 4),
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0), // Espacio antes del siguiente título
+                    padding: const EdgeInsets.only(bottom: 16.0),
                     child: Text(
-                      l10n.history_chart_description, // Nueva clave de localización
+                      l10n.history_chart_description,
                       style: TextStyle(
                         fontSize: 12,
                         fontStyle: FontStyle.italic,
@@ -2883,10 +2875,9 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),// Espacio entre gráfico y tablas
+                const SizedBox(height: 8),
                 Text(
                   l10n.training_history_all,
-                  // Usamos la nueva clave de localización
                   style: Theme
                       .of(context)
                       .textTheme
@@ -2936,7 +2927,6 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
             ),
           ),
         );
-        // --- FIN DEL CAMBIO ---
       },
     );
   }
@@ -2945,8 +2935,6 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
 
   Widget _buildDescriptionTab(Map<String, dynamic> exerciseDefinition) {
     final exerciseImage = exerciseDefinition['image'] as String?;
-    // exerciseDescription = exerciseDefinition['description'] as String?;
-    final exerciseName = exerciseDefinition['name']?.toString();
     final bool isManualExercise = exerciseDefinition['isManual'] == true;
     final String localizedExerciseName = getLocalizedExerciseName(
         context, exerciseDefinition);
@@ -3035,15 +3023,12 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
 
           SizedBox(height: 16),
 
-
-
     SizedBox(height: 6),
 
-    // 4. VALOR de la descripción
     Text(
     localizedExerciseDescription.isNotEmpty
     ? localizedExerciseDescription
-    : l10n.training_description_unknown, // [cite: 21, 155]
+    : l10n.training_description_unknown,
     style: Theme
         .of(context)
         .textTheme
@@ -3067,7 +3052,6 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
     );
   }
 }
-// En training_screen.dart (al final del archivo)
 
 class LogRecordTable extends StatelessWidget {
   final Map<String, dynamic> log;
