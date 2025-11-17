@@ -359,6 +359,8 @@ class _TrainingScreenState extends State<TrainingScreen> {
     return false;
   }
 
+
+
   Future<void> _saveTemplate(
       String name, List<Map<String, dynamic>> exercisesToSave) async {
     final db = DatabaseHelper.instance;
@@ -2155,12 +2157,15 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
     final l10n = AppLocalizations.of(context)!;
     if (_tabController.index == 0) {
       if (!_formKeyCurrentDataTab.currentState!.validate()) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(l10n.training_error_form),
-            backgroundColor: Colors.redAccent));
+        showTopLevelAlert(
+          context,
+          title: l10n.training_error_form, // "Por favor, corrige los errores..."
+          content: l10n.training_image_required, // "Por favor, corrige los errores."
+        );
         return;
       }
     }
+
 
     bool hasBlockingErrors = false;
     int currentSeriesCount = int.tryParse(seriesController.text.trim()) ?? 0;
@@ -2230,9 +2235,11 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
     }
 
     if (hasBlockingErrors) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.training_image_required),
-          backgroundColor: Colors.redAccent));
+      showTopLevelAlert(
+        context,
+        title: l10n.training_error_form,
+        content: l10n.training_image_required,
+      );
       return;
     }
 
@@ -2471,20 +2478,15 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                     tooltip: l10n.close),)
             ]),
             Flexible(
-                child: Container(
-                  constraints: BoxConstraints(maxHeight: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.75),
-                  child: TabBarView(controller: _tabController,
-                    children: [
-                      _buildCurrentDataTab(),
-                      _buildHistoryTab(
-                          exerciseNameToQuery: _currentExerciseDataLog['name'] ??
-                              widget.exercise['name'] ?? ''),
-                      _buildDescriptionTab(exerciseDefinitionForInfoTab),
-                    ],),
-                )),
+              child: TabBarView(controller: _tabController, // <-- Sin el 'Container'
+                children: [
+                  _buildCurrentDataTab(),
+                  _buildHistoryTab(
+                      exerciseNameToQuery: _currentExerciseDataLog['name'] ??
+                          widget.exercise['name'] ?? ''),
+                  _buildDescriptionTab(exerciseDefinitionForInfoTab),
+                ],),
+            )
           ],
         ));
   }
@@ -3153,4 +3155,26 @@ class LogRecordTable extends StatelessWidget {
       ],
     );
   }
+}
+
+Future<void> showTopLevelAlert(BuildContext context, {required String title, required String content}) {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext dialogContext) {
+      final l10n = AppLocalizations.of(dialogContext)!;
+
+      return AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+            child: Text(l10n.close), // Usa la traducción de "Cerrar"
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
 }
