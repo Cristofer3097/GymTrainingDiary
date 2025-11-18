@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../database/database_helper.dart'; 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:intl/intl.dart'; // Para formateo de fechas si es necesario
+import 'package:intl/intl.dart';
 import '../utils/localization_utils.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
@@ -2064,7 +2064,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
       final bool? confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: Text(l10n.training_copy_last),
+          title: Text(l10n.training_copy_register),
           content: Text(
               l10n.training_copy_message),
           actions: [
@@ -2143,13 +2143,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
       // Actualizar los íconos de progreso
       _updateAllProgressStatuses();
 
-      // Mostrar confirmación
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Datos del último registro copiados."),
-          duration: Duration(seconds: 2),
-        ),
-      );
+
     });
   }
 

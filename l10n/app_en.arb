@@ -184,7 +184,6 @@
   "training_register": "Last Register:",
   "training_register_error": "No records for this exercise.",
   "training_copy_register": "Copy record",
-  "training_copy_last": "Copy last record",
   "training_copy_message": "The current data will be replaced with the data from the last record. Do you want to continue?",
 
   "training_date_unknown": "Unknown Date",

@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 import 'training_screen.dart'; //
-import 'calendar.dart'; //
 import '../database/database_helper.dart'; //
 import 'package:intl/date_symbol_data_local.dart';
-import 'extras.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../utils/localization_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'settings.dart';
-import 'ai_screen.dart';
 import 'widgets/app_bottom_nav_bar.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-// Define los colores principales basados en la imagen y tus preferencias
+//colores principales
 const Color amarilloPrincipal = Color(0xFFFFC107); // Un tono de amarillo vibrante (Ámbar)
 const Color fondoOscuro = Color(0xFF121212); // Un gris muy oscuro, casi negro para el fondo
 const Color colorAppBar = Color(0xFF000000); // Negro para la AppBar
@@ -21,7 +16,7 @@ const Color negroBoton = Color(0xFF121212); //Colors.black; // Fondo de los boto
 const Color grisContenedor = Color(0xFF1E1E1E); // Un gris oscuro para tarjetas y diálogos
 const Color grisTextField = Color(0xFF2C2C2C); // Un gris para el fondo de campos de texto
 
-Future<void> main() async { // Hacerla async y retornar Future<void>
+Future<void> main() async { 
   WidgetsFlutterBinding.ensureInitialized(); // Asegurar que los bindings estén inicializados
   await dotenv.load(fileName: ".env");
   await initializeDateFormatting('es_ES', null); // Inicializar datos para español

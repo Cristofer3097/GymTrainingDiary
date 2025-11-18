@@ -226,7 +226,6 @@
   "training_register": "Último Registro:",
   "training_register_error": "Sin registros para este ejercicio.",
   "training_copy_register": "Copiar Registro",
-  "training_copy_last": "Copiar último registro",
   "training_copy_message": "Los datos actuales se reemplazarán con los del último registro. ¿Deseas continuar?",
   "training_date_unknown": "Fecha desconocida",
   "training_error_format": "Error al formatear fecha registrada",
