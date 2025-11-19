@@ -16,7 +16,7 @@ const Color negroBoton = Color(0xFF121212); //Colors.black; // Fondo de los boto
 const Color grisContenedor = Color(0xFF1E1E1E); // Un gris oscuro para tarjetas y diálogos
 const Color grisTextField = Color(0xFF2C2C2C); // Un gris para el fondo de campos de texto
 
-Future<void> main() async { 
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Asegurar que los bindings estén inicializados
   await dotenv.load(fileName: ".env");
   await initializeDateFormatting('es_ES', null); // Inicializar datos para español

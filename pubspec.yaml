@@ -52,6 +52,8 @@ dependencies:
   flutter_dotenv: ^5.1.0
   flutter_markdown: ^0.7.1
   google_mlkit_language_id: ^0.10.0
+  flutter_local_notifications: ^17.0.0
+  vibration: ^1.9.0
 
 
   # The following adds the Cupertino Icons font to your application.

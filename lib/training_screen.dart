@@ -18,6 +18,7 @@ import '../settings.dart';
 import 'package:diacritic/diacritic.dart';
 import 'widgets/stopwatch.dart';
 import 'widgets/app_bottom_nav_bar.dart';
+import '../widgets/timer.dart';
 
 
 enum ProgressStatus { improvement, decline, neutral, noData }
@@ -800,8 +801,30 @@ class _TrainingScreenState extends State<TrainingScreen> {
                         label: Text(l10n.training_create_template))),
               ]),
               if (_isTitleInitialized)
-                StopwatchWidget(
-                  elapsed: displayDuration,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // --- IZQUIERDA CRONÓMETRO
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Duración",
+                            style: TextStyle(fontSize: 10, color: Colors.grey),
+                          ),
+                          StopwatchWidget(
+                            elapsed: displayDuration,
+                          ),
+                        ],
+                      ),
+
+                      // --- DERECHA TEMPORIZADOR ---
+                      const CountdownTimerWidget(),
+                    ],
+                  ),
                 ),
               SizedBox(height: 2),
               if (selectedExercises.isEmpty)
