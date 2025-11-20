@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:vibration/vibration.dart';
+
 
 class CountdownTimerWidget extends StatefulWidget {
   const CountdownTimerWidget({Key? key}) : super(key: key);
@@ -19,13 +18,11 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> with Widget
   DateTime? _endTime;
 
   // Notificaciones
-  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _initNotifications();
   }
 
   @override
@@ -35,76 +32,8 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> with Widget
     super.dispose();
   }
 
-  // Inicializar notificaciones
-  Future<void> _initNotifications() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    const DarwinInitializationSettings initializationSettingsDarwin =
-    DarwinInitializationSettings();
-
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-    );
-
-    await _notificationsPlugin.initialize(initializationSettings);
-
-    final androidImplementation = _notificationsPlugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    if (androidImplementation != null) {
-      await androidImplementation.requestNotificationsPermission();
-    }
-  }
-
-  // Manejar ciclo de vida de la app (Fondo vs Primer plano)
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      // La app se fue a segundo plano
-      if (_isRunning) {
-        _scheduleNotification();
-      }
-    } else if (state == AppLifecycleState.resumed) {
-      // La app volvió
-      _cancelNotification();
-      if (_isRunning && _endTime != null) {
-        final now = DateTime.now();
-        if (now.isAfter(_endTime!)) {
-          // El tiempo se acabó mientras estaba fuera
-          setState(() {
-            _remainingSeconds = 0;
-            _isRunning = false;
-          });
-        } else {
-          // Recalcular tiempo restante
-          setState(() {
-            _remainingSeconds = _endTime!.difference(now).inSeconds;
-          });
-        }
-      }
-    }
-  }
-
-  void _scheduleNotification() async {
-    if (_remainingSeconds <= 0) return;
-
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'timer_channel',
-      'Temporizador',
-      channelDescription: 'Notificaciones del temporizador de descanso',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-
-    const NotificationDetails details = NotificationDetails(android: androidDetails);
 
 
-  }
-
-  void _cancelNotification() {
-    _notificationsPlugin.cancelAll();
-  }
 
   // Lógica del Timer
   void _startOrPauseTimer() {
@@ -135,7 +64,6 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> with Widget
           } else {
             _timer?.cancel();
             _isRunning = false;
-            _onTimerFinished();
           }
         });
       });
@@ -151,29 +79,6 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> with Widget
     });
   }
 
-  Future<void> _onTimerFinished() async {
-    // Vibrar 2 segundos si la app está activa
-    if (await Vibration.hasVibrator() ?? false) {
-      Vibration.vibrate(duration: 2000);
-    }
-
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'timer_finished',
-      'Tiempo Terminado',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-    const NotificationDetails details = NotificationDetails(android: androidDetails);
-
-    // Solo mostramos notificación si NO estamos en primer plano visualmente (difícil de detectar exacto sin contexto)
-    // O simplemente la mostramos siempre como aviso:
-    await _notificationsPlugin.show(
-      0,
-      '¡Tiempo terminado!',
-      'Tu descanso ha finalizado.',
-      details,
-    );
-  }
 
   // Diálogo de configuración
   void _showConfigDialog() {
