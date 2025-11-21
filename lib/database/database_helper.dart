@@ -26,7 +26,7 @@ class DatabaseHelper {
     final path = join(documentsDirectory.path, filePath);
     return await openDatabase(
       path,
-      version: 12,
+      version: 13,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -125,6 +125,12 @@ class DatabaseHelper {
     timestamp TEXT NOT NULL
   )
 ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS deleted_predefined_templates (
+        template_key TEXT PRIMARY KEY
+      )
+    ''');
+
     await _synchronizePredefinedData(db);
     print("Base de datos creada y datos predefinidos sincronizados.");
   }
@@ -190,6 +196,14 @@ class DatabaseHelper {
       await _synchronizePredefinedData(db);
       print("Migración a v12 completada.");
     }
+    if (oldVersion < 13) {
+      print("Migración a v13: Creando tabla de plantillas borradas...");
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS deleted_predefined_templates (
+          template_key TEXT PRIMARY KEY
+        )
+      ''');
+    }
   }
 
 
@@ -242,6 +256,23 @@ class DatabaseHelper {
     for (final templateData in predefinedTemplatesData) {
       String templateKey = templateData['templateKey'] as String;
       String templateName = templateData['templateName'] as String;
+
+      //verificamos si la plantilla ha sido borrada por el usuario
+      try {
+        final deletedCheck = await db.query(
+            'deleted_predefined_templates',
+            where: 'template_key = ?',
+            whereArgs: [templateKey]
+        );
+
+        if (deletedCheck.isNotEmpty) {
+          print("Saltando sincronización de plantilla borrada por usuario: $templateName ($templateKey)");
+          continue; // Saltamos al siguiente ciclo, NO la creamos de nuevo
+        }
+      } catch (e) {
+        // Si la tabla no existe aún (durante una migración muy temprana), ignoramos el error y procedemos
+        print("Error verificando deleted_predefined_templates (puede ser normal en upgrades): $e");
+      }
 
       // Buscamos si la plantilla ya existe por su clave única
       final existingTemplates = await db.query('templates', where: 'template_key = ?', whereArgs: [templateKey]);
@@ -372,9 +403,28 @@ class DatabaseHelper {
     }
   }
 
-
   Future<void> deleteTemplate(int templateId) async {
     final db = await database;
+
+    // Primero: Verificar si es una plantilla predefinida (tiene template_key)
+    final List<Map<String, dynamic>> result = await db.query(
+      'templates',
+      columns: ['template_key'],
+      where: 'id = ?',
+      whereArgs: [templateId],
+    );
+    if (result.isNotEmpty) {
+      final String? key = result.first['template_key'] as String?;
+      if (key != null && key.isNotEmpty) {
+        await db.insert(
+          'deleted_predefined_templates',
+          {'template_key': key},
+          conflictAlgorithm: ConflictAlgorithm.ignore, // Si ya estaba, no pasa nada
+        );
+        print("Plantilla predefinida '$key' marcada como eliminada permanentemente.");
+      }
+    }
+
     await db.delete('templates', where: 'id = ?', whereArgs: [templateId]);
   }
 
