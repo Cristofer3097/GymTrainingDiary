@@ -1,5 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 
 class CountdownTimerWidget extends StatefulWidget {
@@ -23,6 +27,19 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> with Widget
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _loadSavedTime();
+  }
+
+  Future<void> _loadSavedTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _initialSeconds = prefs.getInt('timer_default_seconds') ?? 120;
+        if (!_isRunning) {
+          _remainingSeconds = _initialSeconds;
+        }
+      });
+    }
   }
 
   @override
@@ -82,46 +99,64 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> with Widget
 
   // Diálogo de configuración
   void _showConfigDialog() {
-    int tempSeconds = _initialSeconds;
+    Duration tempDuration = Duration(seconds: _initialSeconds);
+    final l10n = AppLocalizations.of(context)!;
+
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text("Configurar Temporizador"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text("Selecciona duración (segundos/minutos):"),
-              const SizedBox(height: 20),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [30, 60, 90, 120, 150, 180, 210, 240, 300].map((seconds) {
-                  return ChoiceChip(
-                    label: Text(_formatDuration(Duration(seconds: seconds))),
-                    selected: tempSeconds == seconds,
-                    onSelected: (selected) {
-                      if (selected) {
-                        Navigator.pop(context, seconds);
-                      }
-                    },
-                  );
-                }).toList(),
+          backgroundColor: const Color(0xFF1E1E1E),
+          title: Text(l10n.timer_config,
+              style: TextStyle(color: Colors.white)),
+          content: SizedBox(
+            height: 200,
+            width: double.maxFinite,
+            child: CupertinoTheme(
+              data: const CupertinoThemeData(
+                brightness: Brightness.dark,
               ),
-            ],
+              child: CupertinoTimerPicker(
+                mode: CupertinoTimerPickerMode.ms,
+                initialTimerDuration: tempDuration,
+                onTimerDurationChanged: (Duration newDuration) {
+                  if (newDuration.inSeconds > 0) {
+                    tempDuration = newDuration;
+                  }
+                },
+              ),
+            ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancelar")),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.cancel,
+                  style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () {
+                Navigator.pop(context, tempDuration.inSeconds);
+              },
+              child:Text(l10n.save),
+            ),
           ],
         );
       },
-    ).then((value) {
+    ).then((value) async { // Hacemos esta parte async
       if (value != null && value is int) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('timer_default_seconds', value);
+
         setState(() {
           _initialSeconds = value;
-          _remainingSeconds = value;
-          _isRunning = false;
-          _timer?.cancel();
+          if (!_isRunning) {
+            _remainingSeconds = value;
+          }
         });
       }
     });
@@ -129,21 +164,30 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> with Widget
 
   String _formatDuration(Duration d) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    String minutes = twoDigits(d.inMinutes.remainder(60));
-    String seconds = twoDigits(d.inSeconds.remainder(60));
-    return "$minutes:$seconds";
+    if (d.inHours > 0) {
+      String hours = twoDigits(d.inHours);
+      String minutes = twoDigits(d.inMinutes.remainder(60));
+      String seconds = twoDigits(d.inSeconds.remainder(60));
+      return "$hours:$minutes:$seconds";
+    } else {
+      String minutes = twoDigits(d.inMinutes.remainder(60));
+      String seconds = twoDigits(d.inSeconds.remainder(60));
+      return "$minutes:$seconds";
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final Color timerColor = _remainingSeconds == 0 ? Colors.red : (_isRunning ? theme.primaryColor : Colors.grey[400]!);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start, 
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          "Temporizador",
+        Text(
+          l10n.timer,
           style: TextStyle(fontSize: 10, color: Colors.grey),
         ),
         Row(
