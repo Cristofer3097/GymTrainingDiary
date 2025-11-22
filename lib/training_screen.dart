@@ -812,7 +812,7 @@ class _TrainingScreenState extends State<TrainingScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Duración",
+                            l10n.duration,
                             style: TextStyle(fontSize: 10, color: Colors.grey),
                           ),
                           StopwatchWidget(
@@ -821,11 +821,11 @@ class _TrainingScreenState extends State<TrainingScreen> {
                         ],
                       ),
 
-                      // --- DERECHA TEMPORIZADOR ---
-                      const CountdownTimerWidget(),
-                    ],
-                  ),
-                ),
+              // --- DERECHA TEMPORIZADOR ---
+              const CountdownTimerWidget(),
+            ],
+          ),
+        ),
               SizedBox(height: 2),
               if (selectedExercises.isEmpty)
                 Expanded(

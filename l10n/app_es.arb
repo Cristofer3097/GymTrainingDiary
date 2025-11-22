@@ -23,7 +23,8 @@
   "notes": "Notas:",
   "addExerciseButton": "Añadir Ejer.",
   "createTemplateButton": "Crear Plantilla",
-  "timer": "Timer",
+  "duration": "Duración",
+  "timer": "Temporizador",
   "timer_config":"Configurar Temporizador",
   "addExercisesToTraining": "Añade ejercicios a tu entrenamiento.",
 
