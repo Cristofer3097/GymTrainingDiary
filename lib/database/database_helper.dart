@@ -26,7 +26,7 @@ class DatabaseHelper {
     final path = join(documentsDirectory.path, filePath);
     return await openDatabase(
       path,
-      version: 13,
+      version: 14,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -35,22 +35,23 @@ class DatabaseHelper {
   Future<void> closeDB() async {
     if (_database != null && _database!.isOpen) {
       await _database!.close();
-      _database = null; // Marcar como nulo para que se reinicialice en el próximo acceso
+      _database =
+      null; // Marcar como nulo para que se reinicialice en el próximo acceso
       print("Database connection closed.");
     }
   }
 
   Future<void> _createDB(Database db, int version) async {
-
     // Tabla templates
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS templates (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE,
-        template_key TEXT
-
-      );
-    ''');
+  CREATE TABLE IF NOT EXISTS templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    template_key TEXT,
+    position INTEGER DEFAULT 0,
+    user_renamed INTEGER DEFAULT 0
+  );
+''');
 
     await db.execute('''
       CREATE TABLE IF NOT EXISTS categories (
@@ -134,68 +135,10 @@ class DatabaseHelper {
     await _synchronizePredefinedData(db);
     print("Base de datos creada y datos predefinidos sincronizados.");
   }
+
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
     print("Ejecutando _upgradeDB de v$oldVersion a v$newVersion.");
 
-    // Mantenemos la migración de la v1 a la v2
-    if (oldVersion < 2) {
-      await db.execute('ALTER TABLE categories ADD COLUMN is_favorite INTEGER DEFAULT 0');
-      print("Migración a v2: Columna 'is_favorite' añadida.");
-    }
-
-    // CAMBIO: Nueva migración para la v3.
-    // Esta se ejecutará para cualquier usuario que tenga una versión inferior a 3.
-    if (oldVersion < 3) {
-      print("Migración a v3: Sincronizando datos predefinidos...");
-      await _synchronizePredefinedData(db);
-      print("Migración a v3 completada.");
-    }
-    if (oldVersion < 4) {
-      print("Migración a v4: Resincronizando datos para corregir enlaces de plantillas...");
-      await _synchronizePredefinedData(db);
-      print("Migración a v4 completada.");
-    }
-    // Esta migración se ejecutará para cualquier usuario con una versión inferior a 8.
-    if (oldVersion < 8) {
-      print("Migración a v8: Creando la tabla user_preferences...");
-      await db.execute('''
-      CREATE TABLE IF NOT EXISTS user_preferences (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        preference_key TEXT NOT NULL,
-        preference_value TEXT NOT NULL
-      )
-    ''');
-      print("Migración a v8 completada.");
-    }
-    if (oldVersion < 9) {
-      print("Migración a v9: Creando la tabla ai_chat_history...");
-      await db.execute('''
-      CREATE TABLE IF NOT EXISTS ai_chat_history (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        message_text TEXT NOT NULL,
-        is_user INTEGER NOT NULL,
-        timestamp TEXT NOT NULL
-      )
-    ''');
-      print("Migración a v9 completada.");
-    }
-    if (oldVersion < 10) {
-      print("Migración a v10: Sincronizando datos de ejercicios (Calves, etc)...");
-      // Esta función leerá tu lista actualizada en database_exercise.dart
-      // y añadirá los nuevos ejercicios o modificará los existentes.
-      await _synchronizePredefinedData(db);
-      print("Migración a v10 completada.");
-    }
-    if (oldVersion < 11) {
-      print("Migración a v11: Añadiendo columna 'duration' a training_sessions...");
-      await db.execute('ALTER TABLE training_sessions ADD COLUMN duration INTEGER');
-      print("Migración a v11 completada.");
-    }
-    if (oldVersion < 12) {
-      print("Migración a v12: Forzando resincronización de datos predefinidos (corrección de plantillas)...");
-      await _synchronizePredefinedData(db);
-      print("Migración a v12 completada.");
-    }
     if (oldVersion < 13) {
       print("Migración a v13: Creando tabla de plantillas borradas...");
       await db.execute('''
@@ -203,6 +146,14 @@ class DatabaseHelper {
           template_key TEXT PRIMARY KEY
         )
       ''');
+    }
+    if (oldVersion < 14) {
+      print(
+          "Migración a v14: Añadiendo columnas de posición y renombrado a templates...");
+      await db.execute(
+          'ALTER TABLE templates ADD COLUMN position INTEGER DEFAULT 0');
+      await db.execute(
+          'ALTER TABLE templates ADD COLUMN user_renamed INTEGER DEFAULT 0');
     }
   }
 
@@ -266,34 +217,46 @@ class DatabaseHelper {
         );
 
         if (deletedCheck.isNotEmpty) {
-          print("Saltando sincronización de plantilla borrada por usuario: $templateName ($templateKey)");
+          print(
+              "Saltando sincronización de plantilla borrada por usuario: $templateName ($templateKey)");
           continue; // Saltamos al siguiente ciclo, NO la creamos de nuevo
         }
       } catch (e) {
         // Si la tabla no existe aún (durante una migración muy temprana), ignoramos el error y procedemos
-        print("Error verificando deleted_predefined_templates (puede ser normal en upgrades): $e");
+        print(
+            "Error verificando deleted_predefined_templates (puede ser normal en upgrades): $e");
       }
 
       // Buscamos si la plantilla ya existe por su clave única
-      final existingTemplates = await db.query('templates', where: 'template_key = ?', whereArgs: [templateKey]);
+      final existingTemplates = await db.query(
+          'templates', where: 'template_key = ?', whereArgs: [templateKey]);
       int templateId;
 
       if (existingTemplates.isNotEmpty) {
         templateId = existingTemplates.first['id'] as int;
         // Si el nombre ha cambiado en el archivo, lo actualizamos en la BD
         if (existingTemplates.first['name'] != templateName) {
-          batch.update('templates', {'name': templateName}, where: 'id = ?', whereArgs: [templateId]);
+          // Verificamos si la columna existe antes de chequear (por seguridad en migraciones)
+          final isRenamed = existingTemplates.first['user_renamed'] == 1;
+          if (!isRenamed) {
+            batch.update('templates', {'name': templateName}, where: 'id = ?',
+                whereArgs: [templateId]);
+          }
         }
       } else {
-        // Insertamos la nueva plantilla y obtenemos su ID para el siguiente paso
-        templateId = await db.insert('templates', {'name': templateName, 'template_key': templateKey});
+        // si hay nueva plantilla y obtenemos su ID para el siguiente paso
+        templateId = await db.insert(
+            'templates', {'name': templateName, 'template_key': templateKey});
       }
 
+
       // Si tenemos un ID válido, sincronizamos sus ejercicios
-      if(templateId > 0) {
+      if (templateId > 0) {
         // Borramos las asociaciones viejas para asegurar una lista limpia
-        templateBatch.delete('template_exercises', where: 'template_id = ?', whereArgs: [templateId]);
-        List<int> exerciseSourceIds = templateData['exerciseSourceIds'] as List<int>;
+        templateBatch.delete('template_exercises', where: 'template_id = ?',
+            whereArgs: [templateId]);
+        List<int> exerciseSourceIds = templateData['exerciseSourceIds'] as List<
+            int>;
 
         for (int sourceId in exerciseSourceIds) {
           // Buscamos el ID real del ejercicio en la tabla 'categories' usando su 'original_id'
@@ -311,7 +274,8 @@ class DatabaseHelper {
               'category_id': categoryDbId,
             });
           } else {
-            print("Advertencia: Ejercicio con source_id $sourceId no encontrado al sincronizar plantilla '$templateName'.");
+            print(
+                "Advertencia: Ejercicio con source_id $sourceId no encontrado al sincronizar plantilla '$templateName'.");
           }
         }
       }
@@ -324,9 +288,10 @@ class DatabaseHelper {
   Future<void> deleteCategory(int id) async {
     final db = await database;
     await db.delete('categories', where: 'id = ?', whereArgs: [id]);
-
   }
-  Future<List<Map<String, dynamic>>> getExerciseLogs(String exerciseName) async {
+
+  Future<List<Map<String, dynamic>>> getExerciseLogs(
+      String exerciseName) async {
     final db = await database;
     return await db.query(
       'exercise_logs',
@@ -335,6 +300,7 @@ class DatabaseHelper {
       orderBy: 'dateTime DESC',
     );
   }
+
   Future<Map<String, dynamic>?> getLastExerciseLog(String exerciseName) async {
     final db = await database;
     final res = await db.query(
@@ -349,7 +315,8 @@ class DatabaseHelper {
   }
 
 
-  Future<int> insertTrainingSession(String title, String dateTime, int? durationInSeconds) async {
+  Future<int> insertTrainingSession(String title, String dateTime,
+      int? durationInSeconds) async {
     final db = await database;
     return await db.insert('training_sessions', {
       'session_title': title,
@@ -360,7 +327,8 @@ class DatabaseHelper {
 
   Future<int> updateCategory(int id, Map<String, dynamic> category) async {
     final db = await database;
-    return await db.update('categories', category, where: 'id = ?', whereArgs: [id]);
+    return await db.update(
+        'categories', category, where: 'id = ?', whereArgs: [id]);
   }
 
 
@@ -372,8 +340,10 @@ class DatabaseHelper {
       where: 'exercise_name = ?',
       whereArgs: [oldName],
     );
-    print('Nombres de ejercicio actualizados en logs: de "$oldName" a "$newName"');
+    print(
+        'Nombres de ejercicio actualizados en logs: de "$oldName" a "$newName"');
   }
+
   // Métodos de inserción y consulta
   Future<int> insertCategory(Map<String, dynamic> categoryData) async {
     final db = await database;
@@ -387,15 +357,19 @@ class DatabaseHelper {
     };
     return await db.insert('categories', completeCategoryData);
   }
-  Future<void> insertExerciseLogWithSessionId(Map<String, dynamic> logData, int sessionId) async {
+
+  Future<void> insertExerciseLogWithSessionId(Map<String, dynamic> logData,
+      int sessionId) async {
     final db = await database;
     Map<String, dynamic> logToInsert = Map.from(logData);
     logToInsert['session_id'] = sessionId;
     await db.insert('exercise_logs', logToInsert);
   }
+
   Future<void> deleteTrainingSessionAndLogs(int sessionId) async {
     final db = await database;
-    int count = await db.delete('training_sessions', where: 'id = ?', whereArgs: [sessionId]);
+    int count = await db.delete(
+        'training_sessions', where: 'id = ?', whereArgs: [sessionId]);
     if (count > 0) {
       print("Sesión con ID $sessionId y sus logs asociados eliminados.");
     } else {
@@ -419,9 +393,11 @@ class DatabaseHelper {
         await db.insert(
           'deleted_predefined_templates',
           {'template_key': key},
-          conflictAlgorithm: ConflictAlgorithm.ignore, // Si ya estaba, no pasa nada
+          conflictAlgorithm: ConflictAlgorithm
+              .ignore, // Si ya estaba, no pasa nada
         );
-        print("Plantilla predefinida '$key' marcada como eliminada permanentemente.");
+        print(
+            "Plantilla predefinida '$key' marcada como eliminada permanentemente.");
       }
     }
 
@@ -435,8 +411,6 @@ class DatabaseHelper {
   }
 
 
-
-
   Future<int> insertTemplate(String name) async {
     final db = await database;
     return await db.insert(
@@ -447,7 +421,8 @@ class DatabaseHelper {
   }
 
 // Agrega este método para guardar los ejercicios de la plantilla
-  Future<void> insertTemplateExercises(int templateId, List<int> categoryIds) async {
+  Future<void> insertTemplateExercises(int templateId,
+      List<int> categoryIds) async {
     final db = await database;
 
     // Eliminar ejercicios existentes para esta plantilla (si los hay)
@@ -469,6 +444,7 @@ class DatabaseHelper {
 
     await batch.commit();
   }
+
   Future<void> updateExerciseName(String oldName, String newName) async {
     final db = await database;
     await db.transaction((txn) async {
@@ -492,18 +468,18 @@ class DatabaseHelper {
         where: 'exercise_name = ?',
         whereArgs: [oldName],
       );
-
     });
   }
 
 // Obtener todas las plantillas
   Future<List<Map<String, dynamic>>> getAllTemplates() async {
     final db = await database;
-    return await db.query('templates', columns: ['id', 'name', 'template_key'], orderBy: 'id DESC'); // Añadir template_key
+    return await db.query('templates', orderBy: 'position ASC, id DESC');
   }
 
 // Obtener los ejercicios de una plantilla
-  Future<List<Map<String, dynamic>>> getTemplateExercises(int templateId) async {
+  Future<List<Map<String, dynamic>>> getTemplateExercises(
+      int templateId) async {
     final db = await database;
     final String sql = '''
     SELECT
@@ -529,12 +505,16 @@ class DatabaseHelper {
     final List<Map<String, dynamic>> result = await db.rawQuery(
         "SELECT DISTINCT SUBSTR(session_dateTime, 1, 10) as training_date FROM training_sessions WHERE training_date IS NOT NULL ORDER BY training_date DESC"
     );
-    return result.map((map) => DateTime.parse(map['training_date'] as String)).toList();
+    return result
+        .map((map) => DateTime.parse(map['training_date'] as String))
+        .toList();
   }
 
-  Future<List<Map<String, dynamic>>> getTrainingSessionsForDate(DateTime date) async {
+  Future<List<Map<String, dynamic>>> getTrainingSessionsForDate(
+      DateTime date) async {
     final db = await database;
-    String dateString = DateFormat('yyyy-MM-dd').format(date); // Esto ahora es válido
+    String dateString = DateFormat('yyyy-MM-dd').format(
+        date); // Esto ahora es válido
     return await db.query(
       'training_sessions',
       where: "SUBSTR(session_dateTime, 1, 10) = ?",
@@ -543,7 +523,8 @@ class DatabaseHelper {
     );
   }
 
-  Future<List<Map<String, dynamic>>> getExerciseLogsForSession(int sessionId) async {
+  Future<List<Map<String, dynamic>>> getExerciseLogsForSession(
+      int sessionId) async {
     final db = await database;
     return await db.query(
       'exercise_logs',
@@ -552,6 +533,7 @@ class DatabaseHelper {
       orderBy: 'id ASC', // O el orden que prefieras para los ejercicios dentro de una sesión
     );
   }
+
   Future<Map<String, dynamic>?> getExerciseDefinitionByName(String name) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
@@ -567,11 +549,16 @@ class DatabaseHelper {
   }
 
   // Actualizar el título y fecha de una sesión
-  Future<void> updateTrainingSession(int sessionId, String newTitle, String newDateTime, int? duration) async {
+  Future<void> updateTrainingSession(int sessionId, String newTitle,
+      String newDateTime, int? duration) async {
     final db = await database;
     await db.update(
       'training_sessions',
-      {'session_title': newTitle, 'session_dateTime': newDateTime, 'duration': duration},
+      {
+        'session_title': newTitle,
+        'session_dateTime': newDateTime,
+        'duration': duration
+      },
       where: 'id = ?',
       whereArgs: [sessionId],
     );
@@ -600,7 +587,9 @@ class DatabaseHelper {
     // Convierte el resultado en una lista de strings (rutas)
     return result.map((row) => row['image'] as String).toList();
   }
-  Future<List<Map<String, dynamic>>> getFullExerciseLogsForSession(int sessionId) async {
+
+  Future<List<Map<String, dynamic>>> getFullExerciseLogsForSession(
+      int sessionId) async {
     final db = await database;
     // Este query une los logs con las definiciones de los ejercicios para obtener todo en una sola consulta.
     final String sql = '''
@@ -618,6 +607,7 @@ class DatabaseHelper {
   ''';
     return await db.rawQuery(sql, [sessionId]);
   }
+
   /// Añade un ejercicio a la lista de no deseados.
   Future<void> addDislikedExercise(String exerciseName) async {
     final db = await database;
@@ -644,10 +634,12 @@ class DatabaseHelper {
       return maps[i]['preference_value'] as String;
     });
   }
+
   /// Guarda o actualiza una preferencia de valor único (como el objetivo o el equipo).
   Future<void> setPreference(String key, String value) async {
     final db = await database;
-    await db.delete('user_preferences', where: 'preference_key = ?', whereArgs: [key]);
+    await db.delete(
+        'user_preferences', where: 'preference_key = ?', whereArgs: [key]);
     await db.insert('user_preferences', {
       'preference_key': key,
       'preference_value': value.trim().toLowerCase(),
@@ -702,7 +694,8 @@ class DatabaseHelper {
       where: 'preference_key = ?',
       whereArgs: [key],
     );
-    return List.generate(maps.length, (i) => maps[i]['preference_value'] as String);
+    return List.generate(
+        maps.length, (i) => maps[i]['preference_value'] as String);
   }
 
   /// Guarda un nuevo mensaje del chat en la base de datos.
@@ -719,8 +712,8 @@ class DatabaseHelper {
   Future<List<ChatMessage>> getChatHistory() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
-      'ai_chat_history',
-      orderBy: 'timestamp ASC'
+        'ai_chat_history',
+        orderBy: 'timestamp ASC'
     );
     return List.generate(maps.length, (i) {
       return ChatMessage(
@@ -730,6 +723,26 @@ class DatabaseHelper {
     });
   }
 
+  Future<void> updateTemplateName(int id, String newName) async {
+    final db = await database;
+    await db.update(
+      'templates',
+      {'name': newName, 'user_renamed': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 
+  Future<void> updateTemplatesOrder(
+      List<Map<String, dynamic>> templates) async {
+    final db = await database;
+    final batch = db.batch();
+    for (int i = 0; i < templates.length; i++) {
+      final id = templates[i]['id'];
+      batch.update(
+          'templates', {'position': i}, where: 'id = ?', whereArgs: [id]);
+    }
+    await batch.commit(noResult: true);
+  }
 }
 

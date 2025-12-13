@@ -217,6 +217,10 @@ String getLocalizedCategoryName(BuildContext context, String categoryKey) {
 }
 
 String getLocalizedTemplateName(BuildContext context, Map<String, dynamic> templateData) {
+  // verifica si el usuario renombró la plantilla
+  if (templateData['user_renamed'] == 1) {
+    return templateData['name']?.toString() ?? "Plantilla";
+  }
   final l10n = AppLocalizations.of(context)!;
   final String? templateKey = templateData['template_key'] as String?;
   final String templateNameFromDb = templateData['name'] as String? ?? "Plantilla Desconocida";

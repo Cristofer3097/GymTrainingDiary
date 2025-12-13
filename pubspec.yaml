@@ -52,6 +52,7 @@ dependencies:
   flutter_dotenv: ^5.1.0
   flutter_markdown: ^0.7.1
   google_mlkit_language_id: ^0.10.0
+  reorderable_grid_view: ^2.2.5
 
 
   # The following adds the Cupertino Icons font to your application.

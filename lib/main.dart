@@ -7,6 +7,7 @@ import '../utils/localization_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/app_bottom_nav_bar.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 
 //colores principales
 const Color amarilloPrincipal = Color(0xFFFFC107); // Un tono de amarillo vibrante (Ámbar)
@@ -225,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final tpls = await db.getAllTemplates();
     if (mounted) {
       setState(() {
-        templates = tpls;
+        templates = List.from(tpls);
       });
     }
   }
@@ -289,94 +290,75 @@ class _HomeScreenState extends State<HomeScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
-            Expanded(
-              child: templates.isEmpty
-                  ? Center(child: Text(l10n.noTemplatesSaved, //
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey[500], fontSize: 15),
-                  ))
-                  : GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, //
-                    crossAxisSpacing: 12, //
-                    mainAxisSpacing: 12, //
-                    childAspectRatio: 2.2, // Ajusta según el padding del botón
-                  ),
-                  itemCount: templates.length, //
-                  itemBuilder: (context, index) {
-                    final template = templates[index]; //
-                    final String displayTemplateName = getLocalizedTemplateName(context, template); // NUEVO
-                    final templateId = template['id']; //
-
-                    if (templateId == null) {
-                      return Card(
-                          child: Center(
-                              child: Text(l10n.template_id, //
-                                  style: TextStyle(color: Theme.of(context).colorScheme.error))));
+          Expanded(
+            child: templates.isEmpty
+                ? Center(
+                child: Text(
+                  l10n.noTemplatesSaved,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey[500], fontSize: 15),
+                ))
+                : ReorderableGridView.builder(
+                padding: const EdgeInsets.fromLTRB(4, 4, 4, 100),
+                physics: const AlwaysScrollableScrollPhysics(),
+                onReorder: (oldIndex, newIndex) {
+                  setState(() {
+                    final element = templates.removeAt(oldIndex);
+                    if (newIndex > templates.length) {
+                      newIndex = templates.length;
                     }
 
-                    return GestureDetector( //
-                      onLongPress: () async { //
-                        final confirm = await showDialog<bool>(
+                    templates.insert(newIndex, element);
+                  });
+
+                  DatabaseHelper.instance.updateTemplatesOrder(templates);
+                },
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 2.2,
+                ),
+                itemCount: templates.length,
+                itemBuilder: (context, index) {
+                  final template = templates[index];
+                  final String displayTemplateName = getLocalizedTemplateName(context, template);
+                  final templateId = template['id'];
+
+                  final Key itemKey = ValueKey(templateId);
+                  if (templateId == null) return Container(key: itemKey);
+                  return ReorderableDragStartListener(
+                    key: itemKey, // identificar el item
+                    index: index, // saber qué posición se mueve
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        elevation: 3,
+                        shadowColor: Colors.black45,
+                      ),
+                      onPressed: () async {
+                        final db = DatabaseHelper.instance;
+                        final exercises = await db.getTemplateExercises(templateId);
+
+                        final dynamic dialogResult = await showDialog(
                           context: context,
-                          builder: (ctx) => AlertDialog(
-                            title: Text(l10n.template_question), //
-                            content: Text(
-                                l10n.template_question1(displayTemplateName)), //
-                            actions: [
-                              TextButton( //
-                                onPressed: () => Navigator.pop(ctx, false), //
-                                child: Text(l10n.cancel), //
-                              ),
-                              TextButton( //
-                                onPressed: () => Navigator.pop(ctx, true), //
-                                child: Text(l10n.deleteButton, //
-                                    style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (confirm == true) { //
-                          final db = DatabaseHelper.instance; //
-                          await db.deleteTemplate(templateId); //
-                          _loadTemplates(); //
-                          if (mounted) { //
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.templateDeletedSuccessMessage(displayTemplateName)
-                                ), //
-                                backgroundColor: Theme.of(context).cardTheme.color,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
+                          builder: (BuildContext dialogContext) {
+                            return TemplatePreviewDialog(
+                              templateId: templateId,
+                              templateName: displayTemplateName,
+                              exercises: exercises,
                             );
-                          }
+                          },
+                        );
+                        if (mounted) {
+                          _loadTemplates();
                         }
                       },
-                      child: ElevatedButton(
-                        onPressed: () async { //
-                          final db = DatabaseHelper.instance; //
-                          final exercises = await db.getTemplateExercises(templateId); //
-
-                          final dynamic dialogResult = await showDialog(
-                            context: context,
-                            builder: (BuildContext dialogContext) {
-                              return TemplatePreviewDialog( //
-                                templateId: templateId, //
-                                templateName: displayTemplateName, //
-                                exercises: exercises, //
-                              );
-                            },
-                          );
-                          if (dialogResult == true && mounted) { //
-                            _loadTemplates(); //
-                          }
-                        },
-                        child: Text(displayTemplateName, textAlign: TextAlign.center),
-                      ),
-                    );
-                  }),
-            ),
+                      child: Text(displayTemplateName,
+                          textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    ),
+                  );
+                }),
+          ),
     ],
     ),
         ),
@@ -388,7 +370,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// --- VISTA PRINCIPAL (CONTENIDO DE LA PRIMERA PESTAÑA) ---
 class HomeView extends StatelessWidget {
   final List<Map<String, dynamic>> templates;
   final VoidCallback onLoadTemplates; // Callback para recargar plantillas
@@ -460,13 +441,16 @@ class HomeView extends StatelessWidget {
                           final template = templates[index];
                           final String displayTemplateName = getLocalizedTemplateName(context, template);
                           final templateId = template['id'];
-
+                          final Key itemKey = ValueKey(templateId);
+                          if (templateId == null) return Container(key: itemKey);
                           if (templateId == null) {
                             return Card(
                                 child: Center(
                                     child: Text(l10n.template_id,
                                         style: TextStyle(color: Theme.of(context).colorScheme.error))));
                           }
+
+
 
                           return GestureDetector(
                             onLongPress: () async {
@@ -538,7 +522,7 @@ class HomeView extends StatelessWidget {
   }
 }
 
-class TemplatePreviewDialog extends StatelessWidget {
+class TemplatePreviewDialog extends StatefulWidget {
   final int templateId; //
   final String templateName; //
   final List<Map<String, dynamic>> exercises; //
@@ -551,27 +535,98 @@ class TemplatePreviewDialog extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<TemplatePreviewDialog> createState() => _TemplatePreviewDialogState();
+}
+class _TemplatePreviewDialogState extends State<TemplatePreviewDialog> {
+  late String currentName;
+
+  @override
+  void initState() {
+    super.initState();
+    currentName = widget.templateName;
+  }
+
+  void _renameTemplate() {
+    final l10n = AppLocalizations.of(context)!;
+    TextEditingController controller = TextEditingController(text: currentName);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.training_edit_title), // O usa "Renombrar Plantilla"
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(
+            labelText: l10n.training_template_name,
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (controller.text.trim().isNotEmpty) {
+                final newName = controller.text.trim();
+                await DatabaseHelper.instance.updateTemplateName(widget.templateId, newName);
+                setState(() {
+                  currentName = newName;
+                });
+                Navigator.pop(ctx);
+              }
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return AlertDialog( // Se aplica DialogTheme
-      title: Text(templateName, textAlign: TextAlign.center), // Se aplica DialogTheme.titleTextStyle
-      content: Container( // Se aplica DialogTheme.contentTextStyle para el texto dentro
-        width: double.maxFinite, //
-        child: exercises.isEmpty
-            ? Center( //
-            child: Padding( //
+      titlePadding: const EdgeInsets.fromLTRB(24, 16, 12, 0),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              currentName,
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 18),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.edit, color: Theme.of(context).primaryColor, size: 20),
+            tooltip: "Renombrar",
+            onPressed: _renameTemplate,
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: widget.exercises.isEmpty
+            ? Center(
+            child: Padding(
               padding: EdgeInsets.symmetric(vertical: 20.0), //
               child: Text(l10n.template_exercise), //
             ))
-            : ListView.builder( //
-          shrinkWrap: true, //
-          itemCount: exercises.length, //
+            : ListView.builder(
+          shrinkWrap: true,
+          itemCount: widget.exercises.length,
           itemBuilder: (context, index) {
-            final exercise = exercises[index]; //
+            final exercise = widget.exercises[index];
             final exerciseName = getLocalizedExerciseName(context, exercise);
-            return ListTile( // Se aplica ListTileTheme
-              title: Text('${index + 1}. $exerciseName'), //
-              contentPadding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+            return ListTile(
+              title: Text('${index + 1}. $exerciseName'),
+              contentPadding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
             );
           },
         ),
@@ -596,15 +651,15 @@ class TemplatePreviewDialog extends StatelessWidget {
             final bool? confirmedDelete = await showDialog<bool>(
               context: context,
               builder: (BuildContext confirmDialogContext) {
-                return ConfirmDeleteDialog( //
-                  templateId: templateId, //
-                  templateName: templateName, //
+                return ConfirmDeleteDialog(
+                  templateId: widget.templateId,
+                  templateName: currentName,
                 );
               },
             );
-            if (confirmedDelete == true) { //
-              if (Navigator.of(context).canPop()) { //
-                Navigator.of(context).pop(true); //
+            if (confirmedDelete == true) {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop(true);
               }
             }
           },
@@ -615,15 +670,15 @@ class TemplatePreviewDialog extends StatelessWidget {
             final dynamic trainingScreenResult = await Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TrainingScreen( //
-                  initialExercises: exercises, //
-                  templateName: templateName, //
+                builder: (context) => TrainingScreen(
+                  initialExercises: widget.exercises,
+                  templateName: currentName,
                 ),
                 settings: const RouteSettings(name: 'TrainingScreen'),
               ),
             );
-            if (Navigator.of(context).canPop()) { //
-              Navigator.of(context).pop(trainingScreenResult); //
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop(trainingScreenResult);
             }
           },
         ),
