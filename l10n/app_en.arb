@@ -203,7 +203,6 @@
   "training_current": "Current",
   "training_history": "History",
   "training_history_all": "All Records",
-  "history_chart_description": "Results of the five most recent records.",
   "training_history_error": "Error loading history",
   "history_exercise_error": "No previous records for '{exerciseNameToQuery}'.",
   "@history_exercise_error": {
