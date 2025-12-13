@@ -20,7 +20,7 @@ import 'widgets/stopwatch.dart';
 import 'widgets/app_bottom_nav_bar.dart';
 import '../widgets/timer.dart';
 
-
+enum ChartMetric { weight, reps }
 enum ProgressStatus { improvement, decline, neutral, noData }
 // Clase principal de la pantalla de Entrenamiento
 class TrainingScreen extends StatefulWidget {
@@ -1818,7 +1818,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
     with SingleTickerProviderStateMixin {
   final _formKeyCurrentDataTab = GlobalKey<FormState>();
   late TabController _tabController;
-
+  ChartMetric _currentMetric = ChartMetric.weight;
   late TextEditingController seriesController;
   late List<TextEditingController> repControllers;
   late List<TextEditingController> weightControllers;
@@ -2298,6 +2298,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
       List<Map<String, dynamic>> logs) {
     final l10n = AppLocalizations.of(context)!;
     final String localeName = l10n.localeName;
+
     final limitedLogs = logs.length > 5 ? logs.sublist(0, 5) : logs;
     final List<FlSpot> spots = [];
     final List<String> bottomTitles = [];
@@ -2310,25 +2311,24 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
           ',');
 
       if (repsList.isNotEmpty && weightsList.isNotEmpty) {
-        final lastRepStr = repsList.lastWhere((r) => r.isNotEmpty,
-            orElse: () => '');
-        final lastWeightStr = weightsList.lastWhere((w) => w.isNotEmpty,
-            orElse: () => '');
+        final lastRepStr = repsList.lastWhere((r) => r.isNotEmpty, orElse: () => '');
+        final lastWeightStr = weightsList.lastWhere((w) => w.isNotEmpty, orElse: () => '');
 
         if (lastRepStr.isNotEmpty && lastWeightStr.isNotEmpty) {
           final int? reps = int.tryParse(lastRepStr);
           final double? weight = double.tryParse(lastWeightStr);
-          final DateTime? logDate = DateTime.tryParse(
-              log['dateTime'] as String? ?? '');
+          final DateTime? logDate = DateTime.tryParse(log['dateTime'] as String? ?? '');
 
-          if (reps != null && weight != null && logDate != null && reps > 0 &&
-              weight > 0) {
-            //en base a tu fuerza maxima 1RM
-            //final double rm = _calculate1RM(weight, reps);
-            //spots.add(FlSpot(i.toDouble(), rm));
-            spots.add(FlSpot(i.toDouble(), weight));
-            bottomTitles.add(DateFormat('d MMM', localeName).format(
-                logDate)); // Formato como "9 oct."
+          // control de grafico
+          if (reps != null && weight != null && logDate != null) {
+            double yValue;
+            if (_currentMetric == ChartMetric.weight) {
+              yValue = weight;
+            } else {
+              yValue = reps.toDouble();
+            }
+            spots.add(FlSpot(i.toDouble(), yValue));
+            bottomTitles.add(DateFormat('d MMM', localeName).format(logDate));
           }
         }
       }
@@ -2338,16 +2338,47 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
       return const SizedBox.shrink(); // No mostrar nada si no hay datos
     }
 
+    double dataMinY = spots.map((s) => s.y).reduce(min);
+    double dataMaxY = spots.map((s) => s.y).reduce(max);
+
+    if (dataMinY == dataMaxY) {
+      dataMinY -= 5;
+      dataMaxY += 5;
+    }
+
+    double range = dataMaxY - dataMinY;
+    double rawInterval = range / 3;
+
+    double intervalY;
+    if (rawInterval < 1) {
+      intervalY = 1;
+    } else {
+      intervalY = rawInterval.ceilToDouble();
+    }
+
+
+    double chartMinY = ((dataMinY / intervalY).floor() * intervalY) - intervalY;
+    if (chartMinY < 0) chartMinY = 0; // Nunca bajar de 0
+
+    double chartMaxY = ((dataMaxY / intervalY).ceil() * intervalY) + intervalY;
+
+    if (chartMaxY <= chartMinY) {
+      chartMaxY = chartMinY + intervalY * 2;
+    }
+
     // Configuración y estilo del gráfico
     return LineChart(
       LineChartData(
-        gridData: FlGridData(show: false),
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          horizontalInterval: intervalY,
+          getDrawingHorizontalLine: (value) => FlLine(color: Colors.white10, strokeWidth: 1),
+        ),
         titlesData: FlTitlesData(
           show: true,
-          rightTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -2356,18 +2387,12 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
               getTitlesWidget: (value, meta) {
                 int index = value.toInt();
                 if (index >= 0 && index < bottomTitles.length) {
-                  // Muestra títulos de manera inteligente para evitar superposición
-                  if (bottomTitles.length <= 5 || index == 0 ||
-                      index == bottomTitles.length - 1 ||
-                      index == (bottomTitles.length / 2).floor()) {
-                    return SideTitleWidget(
-                      meta: meta,
-                      space: 8.0,
-                      child: Text(bottomTitles[index],
-                          style: const TextStyle(color: Colors.grey,
-                              fontSize: 10)),
-                    );
-                  }
+                  return SideTitleWidget(
+                    meta: meta,
+                    space: 8.0,
+                    child: Text(bottomTitles[index],
+                        style: const TextStyle(color: Colors.grey, fontSize: 10)),
+                  );
                 }
                 return const Text('');
               },
@@ -2376,35 +2401,60 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
+              reservedSize: 35,
+              interval: intervalY,
               getTitlesWidget: (value, meta) {
-                return Text(value.toStringAsFixed(0),
-                    style: const TextStyle(color: Colors.grey, fontSize: 10));
+
+                if (value < chartMinY || value > chartMaxY) return const SizedBox.shrink();
+
+                // Si es entero, mostramos sin decimales
+                if (value % 1 == 0) {
+                  return Text(
+                    value.toStringAsFixed(0),
+                    style: const TextStyle(color: Colors.grey, fontSize: 10),
+                    textAlign: TextAlign.right,
+                  );
+                }
+                return Text(
+                  value.toStringAsFixed(1),
+                  style: const TextStyle(color: Colors.grey, fontSize: 10),
+                  textAlign: TextAlign.right,
+                );
               },
-              reservedSize: 40,
             ),
           ),
         ),
         borderData: FlBorderData(show: false),
-        minY: spots.map((s) => s.y).reduce(min) * 0.95,
-        // Margen inferior
-        maxY: spots.map((s) => s.y).reduce(max) * 1.05,
-        // Margen superior
+        minY: chartMinY,
+        maxY: chartMaxY,
         lineBarsData: [
           LineChartBarData(
             spots: spots,
-            isCurved: false,
-            color: Theme
-                .of(context)
-                .primaryColor,
-            barWidth: 2,
+            isCurved: true,
+            color: Theme.of(context).primaryColor,
+            barWidth: 3,
             isStrokeCapRound: true,
-            dotData: FlDotData(show: true),
+            dotData: FlDotData(
+              show: true,
+              getDotPainter: (spot, percent, barData, index) {
+                return FlDotCirclePainter(
+                  radius: 4,
+                  color: Theme.of(context).primaryColor,
+                  strokeWidth: 1,
+                  strokeColor: Colors.black,
+                );
+              },
+            ),
             belowBarData: BarAreaData(
               show: true,
-              color: Theme
-                  .of(context)
-                  .primaryColor
-                  .withOpacity(0.3),
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor.withOpacity(0.3),
+                  Theme.of(context).primaryColor.withOpacity(0.0),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
             ),
           ),
         ],
@@ -2849,6 +2899,23 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
 
   Widget _buildHistoryTab({required String exerciseNameToQuery}) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    // Estilos para los botones de alternancia
+    final activeButtonStyle = ElevatedButton.styleFrom(
+      backgroundColor: theme.primaryColor,
+      foregroundColor: Colors.black,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+    );
+
+    final inactiveButtonStyle = OutlinedButton.styleFrom(
+      backgroundColor: Colors.transparent,
+      foregroundColor: Colors.grey,
+      side: const BorderSide(color: Colors.grey, width: 1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    );
+
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: DatabaseHelper.instance.getExerciseLogs(exerciseNameToQuery),
       builder: (context, snapshot) {
@@ -2865,7 +2932,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                 l10n.history_exercise_error(exerciseNameToQuery),
                 textAlign: TextAlign.center)));
 
-        return SingleChildScrollView( // Permite el scroll de toda la vista
+        return SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -2879,22 +2946,39 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                   child: _buildHistoryChart(context, logs),
 
                 ),
-                const SizedBox(height: 4),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Text(
-                      l10n.history_chart_description,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey[500],
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _currentMetric == ChartMetric.weight
+                          ? ElevatedButton(
+                        onPressed: () {},
+                        style: activeButtonStyle,
+                        child: Text(l10n.weight),
+                      )
+                          : OutlinedButton(
+                        onPressed: () => setState(() => _currentMetric = ChartMetric.weight),
+                        style: inactiveButtonStyle,
+                        child: Text(l10n.weight),
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                  ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _currentMetric == ChartMetric.reps
+                          ? ElevatedButton(
+                        onPressed: () {},
+                        style: activeButtonStyle,
+                        child: Text(l10n.repetitions),
+                      )
+                          : OutlinedButton(
+                        onPressed: () => setState(() => _currentMetric = ChartMetric.reps),
+                        style: inactiveButtonStyle,
+                        child: Text(l10n.repetitions),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 24),
                 Text(
                   l10n.training_history_all,
                   style: Theme
