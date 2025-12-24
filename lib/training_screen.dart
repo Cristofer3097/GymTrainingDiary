@@ -765,12 +765,6 @@ class _TrainingScreenState extends State<TrainingScreen> {
             icon: Icon(Icons.arrow_back),
             onPressed: _confirmCancelTraining,
           ),
-          actions: [
-            TextButton(
-              onPressed: _confirmCancelTraining,
-              child: Text(l10n.cancel, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)),
-            ),
-          ],
         ),
         bottomNavigationBar: AppBottomNavBar(
         activeRoute: l10n.training_title,
