@@ -760,7 +760,9 @@ class _TrainingScreenState extends State<TrainingScreen> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
+          centerTitle: true,
           title: Text(l10n.training_title),
+
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: _confirmCancelTraining,
