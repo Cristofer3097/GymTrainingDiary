@@ -70,17 +70,20 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> with Widget
         _endTime = DateTime.now().add(Duration(seconds: _remainingSeconds));
       });
 
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-        if (!mounted) return;
+      _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+        final now = DateTime.now();
+        if (_endTime != null) {
+          final difference = _endTime!.difference(now).inSeconds;
 
-        setState(() {
-          if (_remainingSeconds > 0) {
-            _remainingSeconds--;
-          } else {
-            _timer?.cancel();
-            _isRunning = false;
-          }
-        });
+          setState(() {
+            if (_remainingSeconds > 0) {
+              _remainingSeconds--;
+            } else {
+              _timer?.cancel();
+              _isRunning = false;
+            }
+          });
+        }
       });
     }
   }
