@@ -1154,6 +1154,29 @@ class _ExerciseOverlayState extends State<ExerciseOverlay> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+
+    final Map<String, String> categoryNames = {
+      for (var key in _canonicalMuscleGroupKeys)
+        key: getLocalizedCategoryName(context, key)
+    };
+
+    List<String> sortedKeys = _canonicalMuscleGroupKeys
+        .where((key) => key != '' && key != 'Other')
+        .toList();
+
+
+    // 4. Ordenar la lista
+    sortedKeys.sort((a, b) {
+      final nameA = categoryNames[a] ?? '';
+      final nameB = categoryNames[b] ?? '';
+      return nameA.toLowerCase().compareTo(nameB.toLowerCase());
+    });
+    sortedKeys.insert(0, '');
+
+    if (_canonicalMuscleGroupKeys.contains('Other')) {
+      sortedKeys.add('Other');
+    }
+
     List<Map<String, dynamic>> filteredExercises = exercises.where((exercise) {
       String localizedName = removeDiacritics(getLocalizedExerciseName(context, exercise).trim().toLowerCase());
 
@@ -1257,15 +1280,19 @@ class _ExerciseOverlayState extends State<ExerciseOverlay> {
                     child: DropdownButton<String>(
                       isExpanded: true,
                       value: filterCategory.isEmpty ? null : filterCategory,
-                      hint: Text(getLocalizedCategoryName(context, '')),
+                      hint: Text(categoryNames[''] ?? 'Todas'),
                       style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                       dropdownColor: Theme.of(context).cardColor,
-                        items: _canonicalMuscleGroupKeys.map((key) {
-                          return DropdownMenuItem<String>(
-                            value: key, // El valor del item es la clave canónica
-                            child: Text(getLocalizedCategoryName(context, key)), // El texto mostrado es traducido
-                          );
-                        }).toList(),
+
+                      // --- AQUÍ USAMOS LA LISTA ORDENADA (sortedKeys) ---
+                      items: sortedKeys.map((key) {
+                        return DropdownMenuItem<String>(
+                          value: key,
+                          // Mostramos el nombre traducido que ya buscamos antes
+                          child: Text(categoryNames[key] ?? key),
+                        );
+                      }).toList(),
+
                       onChanged: (value) =>
                           setState(() => filterCategory = value ?? ''),
                     )),
