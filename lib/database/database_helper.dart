@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'database_exercise.dart';
 import '../ai_screen.dart';
+import 'package:flutter/material.dart';
 
 
 
@@ -24,12 +25,14 @@ class DatabaseHelper {
   Future<Database> _initDB(String filePath) async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     final path = join(documentsDirectory.path, filePath);
-    return await openDatabase(
+    final db = await openDatabase(
       path,
-      version: 14,
+      version: 1,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
+    await _syncPredefinedExercises(db);
+    return db;
   }
 
   Future<void> closeDB() async {
@@ -139,22 +142,7 @@ class DatabaseHelper {
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
     print("Ejecutando _upgradeDB de v$oldVersion a v$newVersion.");
 
-    if (oldVersion < 13) {
-      print("Migración a v13: Creando tabla de plantillas borradas...");
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS deleted_predefined_templates (
-          template_key TEXT PRIMARY KEY
-        )
-      ''');
-    }
-    if (oldVersion < 14) {
-      print(
-          "Migración a v14: Añadiendo columnas de posición y renombrado a templates...");
-      await db.execute(
-          'ALTER TABLE templates ADD COLUMN position INTEGER DEFAULT 0');
-      await db.execute(
-          'ALTER TABLE templates ADD COLUMN user_renamed INTEGER DEFAULT 0');
-    }
+
   }
 
 
@@ -330,6 +318,8 @@ class DatabaseHelper {
     return await db.update(
         'categories', category, where: 'id = ?', whereArgs: [id]);
   }
+
+
 
 
   Future<void> updateExerciseLogsName(String oldName, String newName) async {
@@ -744,5 +734,37 @@ class DatabaseHelper {
     }
     await batch.commit(noResult: true);
   }
+
+  //
+  Future<void> _syncPredefinedExercises(Database db) async {
+    print("Iniciando sincronización de ejercicios predefinidos...");
+
+
+    for (var exercise in predefinedExerciseList) {
+
+      // 1. Verificamos si ya existe un ejercicio con ese nombre exacto
+      final List<Map<String, dynamic>> existing = await db.query(
+        'categories',
+        where: 'name = ?',
+        whereArgs: [exercise['name']],
+      );
+
+      // 2. Si la lista está vacía, significa que es nuevo en la BD
+      if (existing.isEmpty) {
+        Map<String, dynamic> exerciseToInsert = Map<String, dynamic>.from(exercise);
+
+        exerciseToInsert.remove('id');
+
+        if (!exerciseToInsert.containsKey('is_predefined')) {
+          exerciseToInsert['is_predefined'] = 1;
+        }
+
+        await db.insert('categories', exerciseToInsert);
+        print("Sincronizado nuevo ejercicio: ${exercise['name']}");
+      }
+    }
+  }
+// ---------------------------------
 }
+
 

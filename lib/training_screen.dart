@@ -1454,10 +1454,19 @@ class _ExerciseOverlayState extends State<ExerciseOverlay> {
                       barrierDismissible: false,
                       builder: (dialogCtx) => NewExerciseDialog(
                         onExerciseCreated: (newExerciseData) {
+                          setState(() {
+                            exercises.add(newExerciseData);
+                            exercises.sort((a, b) {
+                              final nameA = a['name']?.toString().toLowerCase() ?? '';
+                              final nameB = b['name']?.toString().toLowerCase() ?? '';
+                              return nameA.compareTo(nameB);
+                            });
+                          });
+
                           widget.onNewExercise(newExerciseData);
                         },
                       ));
-                  await refreshExercises();
+
                 },
               )),
         ],
@@ -1467,7 +1476,6 @@ class _ExerciseOverlayState extends State<ExerciseOverlay> {
 }
 
 
-// ----------- NewExerciseDialog Widget (Sin cambios importantes en esta iteración, se mantiene igual que la anterior) -----------
 class NewExerciseDialog extends StatefulWidget {
   final Function(Map<String, dynamic> newExerciseData)? onExerciseCreated;
   final Map<String, dynamic>? exerciseToEdit;

@@ -33,7 +33,7 @@ class AiScreen extends StatefulWidget {
 
 class _AiScreenState extends State<AiScreen> {
 
-  final genAI = GenerativeModel(model: 'gemini-1.5-flash-latest', apiKey: dotenv.env['GEMINI_API_KEY']!);
+  final genAI = GenerativeModel(model: 'gemini-1.5-flash', apiKey: dotenv.env['GEMINI_API_KEY']!);
   final TextEditingController _controller = TextEditingController();
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;

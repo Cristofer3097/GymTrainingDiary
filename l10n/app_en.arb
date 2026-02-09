@@ -683,7 +683,10 @@
   "exercise_72_description":"The wrist curl dumbbell is a strength-building exercise that primarily targets the forearm muscles, improving grip, enhancing wrist flexibility, and promoting better arm stability. It's an ideal workout for athletes who rely on their forearm strength and wrist control, like tennis players, climbers, and weightlifters. Incorporating this exercise into your routine can help improve performance in sports and daily activities that require wrist action, and can also help prevent wrist and forearm injuries.",
   "exercise_73_name": "Cable Wrist Curl",
   "exercise_73_description":"The Cable Wrist Curl is a strength-building exercise specifically designed to target and enhance the muscles in your forearms. It is ideal for athletes, bodybuilders, or anyone looking to improve their grip strength, wrist stability, or forearm size. Incorporating this exercise into your routine can lead to better performance in activities requiring hand strength and can help prevent wrist and forearm injuries.",
-
+  "exercise_74_name": "Dumbbell Pullover",
+  "exercise_74_description":"The Dumbbell Pullover is a versatile exercise that targets multiple muscle groups, including the lats, triceps, and chest, contributing to overall upper body strength. It's ideal for both beginners and advanced fitness enthusiasts as it can be easily modified to suit varying fitness levels. ",
+  "exercise_75_name": "External Adductor",
+  "exercise_75_description":"Sit on the machine with your back straight, legs apart, and the outside of your thighs on the supports. Perform a leg opening as wide as you can. Then slowly return to the starting position, without dropping the weight abruptly.",
   "predefined_template_Push_Routine": "Push Routine",
   "predefined_template_pull_day": "Pull Day",
   "predefined_template_leg_day_basic_name": "Complete Legs",

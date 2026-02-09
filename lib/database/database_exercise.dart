@@ -532,7 +532,20 @@ const List<Map<String, dynamic>> predefinedExerciseList = [
     'image': 'assets/exercises/Cable-Wrist-Curl.gif',
     'description': 'The Cable Wrist Curl is a strength-building exercise specifically designed to target and enhance the muscles in your forearms. It is ideal for athletes, bodybuilders, or anyone looking to improve their grip strength, wrist stability, or forearm size. Incorporating this exercise into your routine can lead to better performance in activities requiring hand strength and can help prevent wrist and forearm injuries.',
   },
-
+  {
+    'id': 74,
+    'name': 'Dumbbell Pullover',
+    'muscle_group': "Chest",
+    'image': 'assets/exercises/Dumbbell-Pullover.gif',
+    'description': 'El pullover con mancuernas es un ejercicio versátil que se centra en múltiples grupos musculares, incluidos los dorsales, los tríceps y el pecho, lo que contribuye a la fuerza general de la parte superior del cuerpo. Es ideal tanto para principiantes como para entusiastas del fitness avanzados, ya que se puede modificar fácilmente para adaptarse a diferentes niveles de forma física.'
+  },
+  {
+  'id': 75,
+  'name': 'External Adductor',
+  'muscle_group': "Glutes",
+  'image': 'assets/exercises/Extern-Abduction.gif',
+  'description': 'Sit on the machine with your back straight, legs apart, and the outside of your thighs on the supports. Perform a leg opening as wide as you can. Then slowly return to the starting position, without dropping the weight abruptly.'
+},
 ];
 
 const List<Map<String, dynamic>> predefinedTemplatesData = [
