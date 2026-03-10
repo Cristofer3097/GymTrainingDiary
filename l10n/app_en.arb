@@ -687,8 +687,8 @@
   "exercise_74_description":"The Dumbbell Pullover is a versatile exercise that targets multiple muscle groups, including the lats, triceps, and chest, contributing to overall upper body strength. It's ideal for both beginners and advanced fitness enthusiasts as it can be easily modified to suit varying fitness levels. ",
   "exercise_75_name": "External Adductor",
   "exercise_75_description":"Sit on the machine with your back straight, legs apart, and the outside of your thighs on the supports. Perform a leg opening as wide as you can. Then slowly return to the starting position, without dropping the weight abruptly.",
-  "predefined_template_Push_Routine": "Push Routine",
-  "predefined_template_pull_day": "Pull Day",
+  "predefined_template_Push_Routine": "Chest, Shoulder, and Triceps Push",
+  "predefined_template_pull_day": "Back and Arm Pull",
   "predefined_template_leg_day_basic_name": "Complete Legs",
   "predefined_template_complete_torso": "Complete Torso"
 

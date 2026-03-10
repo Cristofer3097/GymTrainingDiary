@@ -685,8 +685,8 @@
   "exercise_75_name": "Aductores Externo ",
   "exercise_75_description":"Siéntese en la máquina con la espalda recta, las piernas separadas y la parte exterior de los muslos apoyada en los soportes. Abra las piernas todo lo que pueda. A continuación, vuelva lentamente a la posición inicial, sin soltar el peso bruscamente.",
 
-  "predefined_template_Push_Routine": "Rutina de Empuje",
-  "predefined_template_pull_day": "Rutina de Jalon",
+  "predefined_template_Push_Routine": "Empuje Pecho, Hombro y Triceps",
+  "predefined_template_pull_day": "Jalon Espalda y Brazo",
   "predefined_template_leg_day_basic_name": "Pierna Completa",
   "predefined_template_complete_torso": "Torso Completo"
 
