@@ -2107,8 +2107,11 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
     });
   }
 
-  Future<void> _copyLastLogData() async {
-    if (widget.lastLog == null) return;
+  // Copia la tabla de datos
+  Future<void> _copyLastLogData([Map<String, dynamic>? specificLog]) async {
+    final logToCopy = specificLog ?? widget.lastLog;
+
+    if (logToCopy == null) return;
     final l10n = AppLocalizations.of(context)!;
 
     // Verifica si ya hay datos en las series
@@ -2119,8 +2122,7 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
         context: context,
         builder: (dialogContext) => AlertDialog(
           title: Text(l10n.training_copy_register),
-          content: Text(
-              l10n.training_copy_message),
+          content: Text(l10n.training_copy_message),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
@@ -2136,10 +2138,9 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
       if (confirmed != true) return;
     }
 
-    // Proceder con la copia de datos
-    final lastLog = widget.lastLog!;
+    // Proceder con la copia de datos usando el log seleccionado (logToCopy)
     setState(() {
-      final String lastSeries = lastLog['series']?.toString() ?? '0';
+      final String lastSeries = logToCopy['series']?.toString() ?? '0';
       seriesController.text = lastSeries;
       seriesCountFromInput = int.tryParse(lastSeries.trim()) ?? 0;
 
@@ -2155,9 +2156,9 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
 
       _initializeSeriesSpecificFields();
 
-      notesController.text = lastLog['notes']?.toString() ?? '';
+      notesController.text = logToCopy['notes']?.toString() ?? '';
 
-      final String lastUnitsStr = lastLog['weightUnit']?.toString() ?? '';
+      final String lastUnitsStr = logToCopy['weightUnit']?.toString() ?? '';
       if (lastUnitsStr.isNotEmpty) {
         List<String> lastUnits = lastUnitsStr.split(',');
         if (lastUnits.isNotEmpty) {
@@ -2168,11 +2169,11 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
         }
       }
 
-      // Copia Reps y Peso
+      // Copia Reps y Peso desde logToCopy
       final List<String> lastReps =
-      (lastLog['reps']?.toString() ?? '').split(',');
+      (logToCopy['reps']?.toString() ?? '').split(',');
       final List<String> lastWeights =
-      (lastLog['weight']?.toString() ?? '').split(',');
+      (logToCopy['weight']?.toString() ?? '').split(',');
 
       for (int i = 0; i < repControllers.length; i++) {
         // Asignar reps
@@ -2196,8 +2197,6 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
 
       // Actualizar los íconos de progreso
       _updateAllProgressStatuses();
-
-
     });
   }
 
@@ -3047,10 +3046,39 @@ class _ExerciseDataDialogState extends State<ExerciseDataDialog>
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(formattedDate, style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontSize: 15)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center, // Alineación vertical perfecta
+                          children: [
+                            Text(formattedDate, style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 15)),
+                            // --- NUEVO DISEÑO DEL BOTÓN: MÁS COMPACTO, MISMO TAMAÑO DE ICONO ---
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Theme.of(context).primaryColor, // Tu borde amarillo
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(6.0), // Esquinas redondeadas
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.history_toggle_off, size: 20), // Icono del mismo tamaño
+                                color: Theme.of(context).primaryColor,
+                                tooltip: l10n.training_copy_register,
+                                // *** CAMBIO CLAVE: Padding interno a cero para compactarlo ***
+                                padding: EdgeInsets.zero,
+                                // *** CAMBIO CLAVE: Constraints mínimos para que no ocupe espacio extra ***
+                                constraints: const BoxConstraints(),
+                                onPressed: () {
+                                  _tabController.animateTo(0);
+                                  _copyLastLogData(log);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 8),
                         LogRecordTable(log: log),
                       ],
