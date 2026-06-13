@@ -1377,6 +1377,34 @@ class _ExerciseOverlayState extends State<ExerciseOverlay> {
                             }
                           },
                         )));
+                    trailingItems.add(SizedBox(
+                        width: iconButtonWidth,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(Icons.edit, color: Theme.of(context).primaryColor),
+                          tooltip: l10n.training_edit_title,
+                          onPressed: () async {
+                            Map<String, dynamic> definitionDataToEdit = {
+                              'id': exercise['id'],
+                              'name': exercise['name'],
+                              'description': exercise['description'],
+                              'image': exercise['image'],
+                              'muscle_group': exercise['category'] ?? exercise['muscle_group'],
+                              'isManual': exercise['isManual'],
+                            };
+
+                            await showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (dialogCtx) => NewExerciseDialog(
+                                exerciseToEdit: definitionDataToEdit,
+                              ),
+                            );
+
+                            // Refresca la lista visual al regresar de editar
+                            await refreshExercises();
+                          },
+                        )));
                   } else {
                     trailingItems.add(SizedBox(width: iconButtonWidth));
                   }
@@ -1464,6 +1492,7 @@ class _ExerciseOverlayState extends State<ExerciseOverlay> {
                           });
 
                           widget.onNewExercise(newExerciseData);
+                          widget.onExerciseChecked(newExerciseData);
                         },
                       ));
 
@@ -1759,10 +1788,8 @@ class _NewExerciseDialogState extends State<NewExerciseDialog> {
                               }
                             }
                             // Proceder con la actualización
-                            await db.updateCategory(idToUpdate, exerciseDataForDb);
-                            if (trimmedName.toLowerCase() != oldName.toLowerCase()) {
-                              await db.updateExerciseLogsName(oldName, trimmedName);
-                            }
+                            await db.updateFullExercise(idToUpdate, oldName, exerciseDataForDb);
+
                             if (mounted) {
                               Navigator.pop(context, {
                                 'id': idToUpdate,

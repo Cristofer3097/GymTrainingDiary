@@ -461,6 +461,36 @@ class DatabaseHelper {
     });
   }
 
+  Future<void> updateFullExercise(int id, String oldName, Map<String, dynamic> updatedCategoryData) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      String newName = updatedCategoryData['name'];
+
+      // 1. Actualizar los datos del ejercicio en 'categories'
+      await txn.update(
+        'categories',
+        updatedCategoryData,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      // 2. Si el nombre cambió, actualizar logs e historial
+      if (oldName != newName) {
+        await txn.insert('exercise_name_history', {
+          'old_name': oldName,
+          'new_name': newName,
+        });
+
+        await txn.update(
+          'exercise_logs',
+          {'exercise_name': newName},
+          where: 'exercise_name = ?',
+          whereArgs: [oldName],
+        );
+      }
+    });
+  }
+
 // Obtener todas las plantillas
   Future<List<Map<String, dynamic>>> getAllTemplates() async {
     final db = await database;
